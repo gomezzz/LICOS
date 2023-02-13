@@ -12,6 +12,16 @@ from init_paseos import init_paseos
 from train import train_one_epoch, test_epoch, init_training
 
 
+def constraint_func(paseos_instance, actors_to_track):
+    local_t = paseos_instance.local_actor.local_time
+    paseos_instance.emtpy_known_actors()
+    for actor in actors_to_track:
+        if paseos_instance.local_actor.is_in_line_of_sight(actor, local_t):
+            paseos_instance.add_known_actor(actor)
+
+    return True
+
+
 def main(argv):
     # Init
     rank = 0
@@ -32,13 +42,13 @@ def main(argv):
     ) = init_training(args)
 
     # Init paseos
-    paseos_instance, local_actor = init_paseos(rank)
+    paseos_instance, local_actor, groundstations = init_paseos(rank)
 
     plotter = paseos.plot(paseos_instance, paseos.PlotType.SpacePlot)
 
     # Training loop
     best_loss = float("inf")
-    time_per_epoch = 112 * 5
+    time_per_epoch = 100 * 200
     for epoch in range(last_epoch, args.epochs):
         print(
             f"Rank {rank} - Temperature: {local_actor.temperature_in_K - 273.15}, Battery: {local_actor.state_of_charge}, In_Eclpise: {local_actor.is_in_eclipse()}"
@@ -47,9 +57,12 @@ def main(argv):
 
         # Wattage from 1605B https://www.amd.com/en/products/embedded-ryzen-v1000-series
         # https://unibap.com/wp-content/uploads/2021/06/spacecloud-ix5-100-product-overview_v23.pdf
-        # 1400 base consumption for S2 from https://sentinels.copernicus.eu/documents/247904/349490/S2_SP-1322_2.pdf
         paseos_instance.advance_time(
-            time_per_epoch, current_power_consumption_in_W=1400 + 30
+            time_per_epoch,
+            current_power_consumption_in_W=30,
+            constraint_function=lambda: constraint_func(
+                paseos_instance, groundstations
+            ),
         )
 
         # Train one

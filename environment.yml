@@ -1,14 +1,16 @@
 name: licos
 channels:
-- conda-forge
-- pytorch
+  - conda-forge
+  - pytorch
 dependencies:
-- cudatoolkit
-- python=3.10
-- pytorch
-- torchvision
-- scipy
-- numpy
-- pip
-- pip:
-  - compressai
+  - cudatoolkit
+  - pandas
+  - pykep
+  - python=3.10
+  - pytorch
+  - torchvision
+  - scipy
+  - numpy
+  - pip
+  - pip:
+      - compressai

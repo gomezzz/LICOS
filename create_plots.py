@@ -2,12 +2,27 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 
+def get_known_actor_comms_status(values):
+    """Helper function to track comms status"""
+    vals = []
+    for item in values:
+        if "Svalbard" in item:
+            vals.append(1)
+        elif "Matera" in item:
+            vals.append(2)
+        elif "Maspalomas" in item:
+            vals.append(3)
+        else:
+            vals.append(0)
+    return vals
+
+
 def create_plots(paseos_instances):
     quantities = [
         "temperature",
         "state_of_charge",
         "current_activity",
-        # "known_actors",
+        "known_actors",
         "is_in_eclipse",
     ]
 
@@ -28,7 +43,10 @@ def create_plots(paseos_instances):
             timesteps = instance.monitor["timesteps"]
 
             # Get data
-            values = instance.monitor[item]
+            if item == "known_actors":
+                values = get_known_actor_comms_status(instance.monitor[item])
+            else:
+                values = instance.monitor[item]
             names.append(instance.local_actor.name)
 
             # Collect data from this sat into big dataframe
@@ -49,6 +67,8 @@ def create_plots(paseos_instances):
             plt.plot(timesteps, values)
             plt.xlabel("Time [s]")
             plt.ylabel(item.replace("_", " "))
+            if item == "known_actors":
+                plt.yticks([0, 1, 2, 3], ["None", "Svalbard", "Matera", "Maspalomas"])
             plt.savefig("results/" + item + ".png", dpi=150)
         # Add a legend showing which satellite is which
         # plt.legend(

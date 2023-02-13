@@ -131,3 +131,6 @@ data
 external
 paseos
 compressai
+results
+checkpoint_best_loss.pth.tar
+checkpoint.pth.tar

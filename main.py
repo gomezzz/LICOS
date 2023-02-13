@@ -13,6 +13,15 @@ from train import train_one_epoch, test_epoch, init_training
 
 
 def constraint_func(paseos_instance, actors_to_track):
+    """Constraint function for activitiy
+
+    Args:
+        paseos_instance (paseos): Local instance
+        actors_to_track (Actor): Local Actor
+
+    Returns:
+        True
+    """
     local_t = paseos_instance.local_actor.local_time
     paseos_instance.emtpy_known_actors()
     for actor in actors_to_track:

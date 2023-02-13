@@ -18,6 +18,11 @@ def get_known_actor_comms_status(values):
 
 
 def create_plots(paseos_instances):
+    """Creates plots from the instance
+
+    Args:
+        paseos_instances (PASEOS): _description_
+    """
     quantities = [
         "temperature",
         "state_of_charge",

@@ -15,6 +15,15 @@ from utils import AverageMeter, CustomDataParallel, configure_optimizers
 
 
 def init_training(args):
+    """Initializes training
+
+    Args:
+        args (dict): Passed arguments / parameters
+
+    Returns:
+        net,optimizer,aux_optimizer,criterion,train_dataloader,test_dataloader,lr_scheduler,last_epoch
+    """
+
     if args.seed is not None:
         torch.manual_seed(args.seed)
         random.seed(args.seed)

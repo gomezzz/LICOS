@@ -6,6 +6,14 @@ from get_constellation import get_constellation
 
 
 def init_paseos(rank):
+    """Initialize PASEOS simulation.
+
+    Args:
+        rank (int): Index of this compute rank.
+
+    Returns:
+        paseos_instance, local_actor, groundstation_actors
+    """
     # PASEOS setup
     altitude = 786 * 1000  # altitude above the Earth's ground [m]
     inclination = 98.62  # inclination of the orbit

@@ -48,7 +48,7 @@ def main(argv):
 
     # Training loop
     best_loss = float("inf")
-    time_per_epoch = 100 * 200
+    time_per_epoch = 100 * 100
     for epoch in range(last_epoch, args.epochs):
         print(
             f"Rank {rank} - Temperature: {local_actor.temperature_in_K - 273.15}, Battery: {local_actor.state_of_charge}, In_Eclpise: {local_actor.is_in_eclipse()}"

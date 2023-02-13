@@ -41,7 +41,7 @@ def init_paseos(rank):
         actor=local_actor,
         battery_level_in_Ws=1e6 * 0.5,
         max_battery_level_in_Ws=1e6,
-        charging_rate_in_W=50,
+        charging_rate_in_W=30,
     )
 
     # TODO update and sanity check

@@ -4,13 +4,15 @@ channels:
   - pytorch
 dependencies:
   - cudatoolkit
+  - ipykernel
+  - ipywidgets
+  - numpy
   - pandas
   - pykep
   - python=3.10
   - pytorch
-  - torchvision
   - scipy
-  - numpy
+  - torchvision
   - pip
   - pip:
       - compressai

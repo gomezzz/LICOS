@@ -172,10 +172,9 @@ def main(argv):
                     )
             batch_idx += 1
         else:
-            if batch_idx % 10 == 0:
-                print(
-                    f"Rank {rank} standing by - Temperature[C]: {local_actor.temperature_in_K - 273.15:.2f}, Battery SoC: {local_actor.state_of_charge:.2f}"
-                )
+            print(
+                f"Rank {rank} standing by - Temperature[C]: {local_actor.temperature_in_K - 273.15:.2f}, Battery SoC: {local_actor.state_of_charge:.2f}"
+            )
 
         if plot and batch_idx % 10 == 0:
             plotter.update(paseos_instance)

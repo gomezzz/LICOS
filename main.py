@@ -9,10 +9,10 @@ from utils import (
 )
 from create_plots import create_plots
 from init_paseos import init_paseos
-from train import train_one_epoch, test_epoch, init_training
+from train import train_one_batch, train_one_epoch, test_epoch, init_training
 
 
-def constraint_func(paseos_instance, actors_to_track):
+def constraint_func(paseos_instance: paseos.PASEOS, actors_to_track):
     """Constraint function for activitiy
 
     Args:
@@ -22,11 +22,19 @@ def constraint_func(paseos_instance, actors_to_track):
     Returns:
         True
     """
+
+    # Update known actors
     local_t = paseos_instance.local_actor.local_time
     paseos_instance.emtpy_known_actors()
     for actor in actors_to_track:
         if paseos_instance.local_actor.is_in_line_of_sight(actor, local_t):
             paseos_instance.add_known_actor(actor)
+
+    # Check constraints
+    if paseos_instance.local_actor.temperature_in_K > (273.15 + 45):
+        return False
+    if paseos_instance.local_actor.state_of_charge < 0.2:
+        return False
 
     return True
 
@@ -48,6 +56,7 @@ def main(argv):
         test_dataloader,
         lr_scheduler,
         last_epoch,
+        train_dataloader_iter,
     ) = init_training(args)
 
     # Init paseos
@@ -57,12 +66,15 @@ def main(argv):
 
     # Training loop
     best_loss = float("inf")
-    time_per_epoch = 100 * 100
-    for epoch in range(last_epoch, args.epochs):
-        print(
-            f"Rank {rank} - Temperature: {local_actor.temperature_in_K - 273.15}, Battery: {local_actor.state_of_charge}, In_Eclpise: {local_actor.is_in_eclipse()}"
-        )
-        print(f"PASEOS advancing time by {time_per_epoch}s.")
+    time_per_epoch = 0.1 * 100
+    batch_idx = 0
+    test_freq = 500
+    for batch_idx in range(last_epoch, args.epochs):
+        if batch_idx % 100 == 0:
+            print(
+                f"Rank {rank} - Temperature[C]: {local_actor.temperature_in_K - 273.15:.2f}, Battery SoC: {local_actor.state_of_charge:.2f}"
+            )
+            # print(f"PASEOS advancing time by {time_per_epoch}s.")
 
         # Wattage from 1605B https://www.amd.com/en/products/embedded-ryzen-v1000-series
         # https://unibap.com/wp-content/uploads/2021/06/spacecloud-ix5-100-product-overview_v23.pdf
@@ -75,40 +87,45 @@ def main(argv):
         )
 
         # Train one
-        print(f"Learning rate: {optimizer.param_groups[0]['lr']}")
         start = time.time()
-        train_one_epoch(
+        train_dataloader_iter = train_one_batch(
             net,
             criterion,
             train_dataloader,
+            train_dataloader_iter,
             optimizer,
             aux_optimizer,
-            epoch,
+            batch_idx,
             args.clip_max_norm,
         )
-        print(f"Training one epoch took {time.time() - start}s")
+        # if batch_idx % 10 == 0:
+        # print(f"Training one batch took {time.time() - start}s")
 
-        start = time.time()
-        loss = test_epoch(epoch, test_dataloader, net, criterion)
-        print(f"Test evaluation took {time.time() - start}s")
+        if batch_idx % test_freq == 0:
+            print(f"Evaluating test set")
+            print(f"Previous learning rate: {optimizer.param_groups[0]['lr']}")
+            start = time.time()
+            loss = test_epoch(batch_idx, test_dataloader, net, criterion)
+            print(f"Test evaluation took {time.time() - start}s")
 
-        lr_scheduler.step(loss)
+            lr_scheduler.step(loss)
+            print(f"New learning rate: {optimizer.param_groups[0]['lr']}")
 
-        is_best = loss < best_loss
-        best_loss = min(loss, best_loss)
+            is_best = loss < best_loss
+            best_loss = min(loss, best_loss)
 
-        if args.save:
-            save_checkpoint(
-                {
-                    "epoch": epoch,
-                    "state_dict": net.state_dict(),
-                    "loss": loss,
-                    "optimizer": optimizer.state_dict(),
-                    "aux_optimizer": aux_optimizer.state_dict(),
-                    "lr_scheduler": lr_scheduler.state_dict(),
-                },
-                is_best,
-            )
+            if args.save:
+                save_checkpoint(
+                    {
+                        "batch_idx": batch_idx,
+                        "state_dict": net.state_dict(),
+                        "loss": loss,
+                        "optimizer": optimizer.state_dict(),
+                        "aux_optimizer": aux_optimizer.state_dict(),
+                        "lr_scheduler": lr_scheduler.state_dict(),
+                    },
+                    is_best,
+                )
 
         plotter.update(paseos_instance)
 

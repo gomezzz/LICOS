@@ -47,22 +47,22 @@ def init_paseos(rank):
     # 87Ah * 28 Volt = 8.7696e9Ws
     ActorBuilder.set_power_devices(
         actor=local_actor,
-        battery_level_in_Ws=1e6 * 0.5,
-        max_battery_level_in_Ws=1e6,
-        charging_rate_in_W=30,
+        battery_level_in_Ws=277200 * 0.5,
+        max_battery_level_in_Ws=277200,
+        charging_rate_in_W=20,
     )
 
     # TODO update and sanity check
     ActorBuilder.set_thermal_model(
         actor=local_actor,
-        actor_mass=50.0,
-        actor_initial_temperature_in_K=273.15,
-        actor_sun_absorptance=1.0,
-        actor_infrared_absorptance=1.0,
-        actor_sun_facing_area=2.0,
-        actor_central_body_facing_area=2.0,
-        actor_emissive_area=4.0,
-        actor_thermal_capacity=1000,
+        actor_mass=6.0,
+        actor_initial_temperature_in_K=283.15,
+        actor_sun_absorptance=0.95,
+        actor_infrared_absorptance=0.5,
+        actor_sun_facing_area=18e-2,
+        actor_central_body_facing_area=10e-2,
+        actor_emissive_area=50e-2,
+        actor_thermal_capacity=6000,
     )
 
     paseos_instance = paseos.init_sim(local_actor=local_actor)

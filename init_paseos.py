@@ -15,8 +15,11 @@ def init_paseos(rank):
         paseos_instance, local_actor, groundstation_actors
     """
     # PASEOS setup
-    altitude = 786 * 1000  # altitude above the Earth's ground [m]
-    inclination = 98.62  # inclination of the orbit
+    # altitude = 786 * 1000  # altitude above the Earth's ground [m]
+    # inclination = 98.62  # inclination of the orbit
+    altitude = 567 * 1000
+    inclination = 97.7
+
     nPlanes = 1  # the number of orbital planes
     nSats = 1  # the number of satellites per orbital plane
     t0 = pk.epoch_from_string("2023-Dec-17 14:42:42")  # starting date of our simulation
@@ -59,13 +62,15 @@ def init_paseos(rank):
         actor_initial_temperature_in_K=283.15,
         actor_sun_absorptance=0.95,
         actor_infrared_absorptance=0.5,
-        actor_sun_facing_area=18e-2,
+        actor_sun_facing_area=12e-2,
         actor_central_body_facing_area=10e-2,
         actor_emissive_area=50e-2,
         actor_thermal_capacity=6000,
     )
 
-    paseos_instance = paseos.init_sim(local_actor=local_actor)
+    cfg = paseos.load_default_cfg()  # loading cfg to modify defaults
+    cfg.sim.start_time = t0.mjd2000 * pk.DAY2SEC  # convert epoch to seconds
+    paseos_instance = paseos.init_sim(local_actor=local_actor,cfg=cfg)
     print(f"Rank {rank} set up its PASEOS instance for its local actor {local_actor}")
 
     # Ground stations

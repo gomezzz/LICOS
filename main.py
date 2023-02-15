@@ -31,9 +31,9 @@ def constraint_func(paseos_instance: paseos.PASEOS, actors_to_track):
             paseos_instance.add_known_actor(actor)
 
     # Check constraints
-    if paseos_instance.local_actor.temperature_in_K > (273.15 + 45):
+    if paseos_instance.local_actor.temperature_in_K > (273.15 + 65):
         return False
-    if paseos_instance.local_actor.state_of_charge < 0.2:
+    if paseos_instance.local_actor.state_of_charge < 0.1:
         return False
 
     return True
@@ -53,7 +53,7 @@ def decide_on_activity(
     """
     if (
         paseos_instance.local_actor.temperature_in_K > (273.15 + 40)
-        or paseos_instance.local_actor.state_of_charge < 0.25
+        or paseos_instance.local_actor.state_of_charge < 0.2
         or (time_in_standby > 0 and time_in_standby < standby_period)
     ):
         return "Standby", 5, time_in_standby + timestep
@@ -79,10 +79,10 @@ def perform_activity(
 def main(argv):
     # Init
     rank = 0  # compute index of this node
-    test_freq = 500  # after how many it to eval test set
+    test_freq = 2500  # after how many it to eval test set
     time_per_batch = 0.1 * 100  # estimated time per batch in seconds
     time_in_standby = 0
-    standby_period = 600  # how long to standby if necessary
+    standby_period = 900  # how long to standby if necessary
     plot = False
     constraint_function = lambda: constraint_func(paseos_instance, groundstations)
     args = parse_args(argv)
@@ -172,9 +172,10 @@ def main(argv):
                     )
             batch_idx += 1
         else:
-            print(
-                f"Rank {rank} standing by - Temperature[C]: {local_actor.temperature_in_K - 273.15:.2f}, Battery SoC: {local_actor.state_of_charge:.2f}"
-            )
+            if batch_idx % 10 == 0:
+                print(
+                    f"Rank {rank} standing by - Temperature[C]: {local_actor.temperature_in_K - 273.15:.2f}, Battery SoC: {local_actor.state_of_charge:.2f}"
+                )
 
         if plot and batch_idx % 10 == 0:
             plotter.update(paseos_instance)

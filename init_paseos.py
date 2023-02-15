@@ -60,11 +60,11 @@ def init_paseos(rank):
         actor=local_actor,
         actor_mass=6.0,
         actor_initial_temperature_in_K=283.15,
-        actor_sun_absorptance=0.95,
+        actor_sun_absorptance=0.9,
         actor_infrared_absorptance=0.5,
-        actor_sun_facing_area=12e-2,
-        actor_central_body_facing_area=10e-2,
-        actor_emissive_area=50e-2,
+        actor_sun_facing_area=0.012,
+        actor_central_body_facing_area=0.01,
+        actor_emissive_area=0.1,
         actor_thermal_capacity=6000,
     )
 

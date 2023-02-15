@@ -82,7 +82,8 @@ def main(argv):
     test_freq = 500  # after how many it to eval test set
     time_per_batch = 0.1 * 100  # estimated time per batch in seconds
     time_in_standby = 0
-    standby_period = 600 # how long to standby if necessary
+    standby_period = 600  # how long to standby if necessary
+    plot = False
     constraint_function = lambda: constraint_func(paseos_instance, groundstations)
     args = parse_args(argv)
     paseos.set_log_level("INFO")
@@ -104,7 +105,8 @@ def main(argv):
     # Init paseos
     paseos_instance, local_actor, groundstations = init_paseos(rank)
 
-    plotter = paseos.plot(paseos_instance, paseos.PlotType.SpacePlot)
+    if plot:
+        plotter = paseos.plot(paseos_instance, paseos.PlotType.SpacePlot)
 
     # Training loop
     best_loss = float("inf")
@@ -174,7 +176,8 @@ def main(argv):
                 f"Rank {rank} standing by - Temperature[C]: {local_actor.temperature_in_K - 273.15:.2f}, Battery SoC: {local_actor.state_of_charge:.2f}"
             )
 
-        plotter.update(paseos_instance)
+        if plot and batch_idx % 10 == 0:
+            plotter.update(paseos_instance)
 
     paseos_instance.save_status_log_csv("results/" + str(rank) + ".csv")
     create_plots(paseos_instances=[paseos_instance])

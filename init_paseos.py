@@ -15,10 +15,10 @@ def init_paseos(rank):
         paseos_instance, local_actor, groundstation_actors
     """
     # PASEOS setup
-    # altitude = 786 * 1000  # altitude above the Earth's ground [m]
-    # inclination = 98.62  # inclination of the orbit
-    altitude = 567 * 1000
-    inclination = 97.7
+    altitude = 786 * 1000  # altitude above the Earth's ground [m]
+    inclination = 98.62  # inclination of the orbit
+    # altitude = 567 * 1000
+    # inclination = 97.7
 
     nPlanes = 1  # the number of orbital planes
     nSats = 1  # the number of satellites per orbital plane
@@ -70,7 +70,7 @@ def init_paseos(rank):
 
     cfg = paseos.load_default_cfg()  # loading cfg to modify defaults
     cfg.sim.start_time = t0.mjd2000 * pk.DAY2SEC  # convert epoch to seconds
-    paseos_instance = paseos.init_sim(local_actor=local_actor,cfg=cfg)
+    paseos_instance = paseos.init_sim(local_actor=local_actor, cfg=cfg)
     print(f"Rank {rank} set up its PASEOS instance for its local actor {local_actor}")
 
     # Ground stations

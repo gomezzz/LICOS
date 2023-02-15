@@ -50,6 +50,8 @@ def init_training(args):
         pin_memory=(device == "cuda"),
     )
 
+    train_dataloader_iter = iter(train_dataloader)
+
     test_dataloader = DataLoader(
         test_dataset,
         batch_size=args.test_batch_size,
@@ -87,7 +89,57 @@ def init_training(args):
         test_dataloader,
         lr_scheduler,
         last_epoch,
+        train_dataloader_iter,
     )
+
+
+def train_one_batch(
+    model,
+    criterion,
+    train_dataloader,
+    train_dataloader_iter: DataLoader,
+    optimizer,
+    aux_optimizer,
+    batch_idx,
+    clip_max_norm,
+):
+    model.train()
+    device = next(model.parameters()).device
+
+    try:
+        d = next(train_dataloader_iter)
+    except StopIteration:
+        # StopIteration is thrown if dataset ends
+        # reinitialize data loader
+        train_dataloader_iter = iter(train_dataloader)
+        d = next(train_dataloader_iter)
+
+    d = d.to(device)
+    optimizer.zero_grad()
+    aux_optimizer.zero_grad()
+
+    out_net = model(d)
+
+    out_criterion = criterion(out_net, d)
+    out_criterion["loss"].backward()
+    if clip_max_norm > 0:
+        torch.nn.utils.clip_grad_norm_(model.parameters(), clip_max_norm)
+    optimizer.step()
+
+    aux_loss = model.aux_loss()
+    aux_loss.backward()
+    aux_optimizer.step()
+
+    if batch_idx % 10 == 0:
+        print(
+            f"Training batch {batch_idx}: ["
+            f'\tLoss: {out_criterion["loss"].item():.3f} |'
+            f'\tMSE loss: {out_criterion["mse_loss"].item():.3f} |'
+            f'\tBpp loss: {out_criterion["bpp_loss"].item():.2f} |'
+            f"\tAux loss: {aux_loss.item():.2f}"
+        )
+
+    return train_dataloader_iter
 
 
 def train_one_epoch(

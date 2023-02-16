@@ -5,11 +5,12 @@ from paseos import ActorBuilder, SpacecraftActor, GroundstationActor
 from get_constellation import get_constellation
 
 
-def init_paseos(rank):
+def init_paseos(rank, N_ranks):
     """Initialize PASEOS simulation.
 
     Args:
         rank (int): Index of this compute rank.
+        N_ranks (int): Number of ranks.
 
     Returns:
         paseos_instance, local_actor, groundstation_actors
@@ -17,11 +18,9 @@ def init_paseos(rank):
     # PASEOS setup
     altitude = 786 * 1000  # altitude above the Earth's ground [m]
     inclination = 98.62  # inclination of the orbit
-    # altitude = 567 * 1000
-    # inclination = 97.7
 
     nPlanes = 1  # the number of orbital planes
-    nSats = 1  # the number of satellites per orbital plane
+    nSats = N_ranks  # the number of satellites per orbital plane
     t0 = pk.epoch_from_string("2023-Dec-17 14:42:42")  # starting date of our simulation
 
     # Compute the orbit of each rank
@@ -33,7 +32,7 @@ def init_paseos(rank):
     )
 
     earth = pk.planet.jpl_lp("earth")  # define our central body
-    pos, v = sats_pos_and_v[0]  # get our position and velocity
+    pos, v = sats_pos_and_v[rank]  # get our position and velocity
 
     # Create the local actor, name will be the rank
     local_actor = ActorBuilder.get_actor_scaffold(
@@ -42,9 +41,9 @@ def init_paseos(rank):
     ActorBuilder.set_orbit(
         actor=local_actor, position=pos, velocity=v, epoch=t0, central_body=earth
     )
-    ActorBuilder.add_comm_device(
-        actor=local_actor, device_name="Link1", bandwidth_in_kbps=1000
-    )
+    # ActorBuilder.add_comm_device(
+    #     actor=local_actor, device_name="Link1", bandwidth_in_kbps=1000
+    # )
 
     # Battery from https://sentinels.copernicus.eu/documents/247904/349490/S2_SP-1322_2.pdf
     # 87Ah * 28 Volt = 8.7696e9Ws

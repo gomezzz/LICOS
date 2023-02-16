@@ -17,7 +17,7 @@ def get_known_actor_comms_status(values):
     return vals
 
 
-def create_plots(paseos_instances):
+def create_plots(paseos_instances, rank):
     """Creates plots from the instance
 
     Args:
@@ -74,7 +74,7 @@ def create_plots(paseos_instances):
             plt.ylabel(item.replace("_", " "))
             if item == "known_actors":
                 plt.yticks([0, 1, 2, 3], ["None", "Svalbard", "Matera", "Maspalomas"])
-            plt.savefig("results/" + item + ".png", dpi=150)
+            plt.savefig("results/" + item + "_rank" + str(rank) + ".png", dpi=150)
         # Add a legend showing which satellite is which
         # plt.legend(
         #         names,

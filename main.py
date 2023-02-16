@@ -1,7 +1,10 @@
 import sys
 import time
 
+import torch
+import numpy as np
 import paseos
+from mpi4py import MPI
 
 from utils import (
     parse_args,
@@ -9,7 +12,7 @@ from utils import (
 )
 from create_plots import create_plots
 from init_paseos import init_paseos
-from train import train_one_batch, train_one_epoch, test_epoch, init_training
+from train import train_one_batch, test_epoch, init_training
 
 
 def constraint_func(paseos_instance: paseos.PASEOS, actors_to_track):
@@ -76,18 +79,39 @@ def perform_activity(
         raise ("Activity was interrupted. Constraints no longer true?")
 
 
+def aggregate(rank_model, received_models, device):
+    cw = 1 / (len(received_models) + 1)
+
+    local_sd = rank_model.state_dict()
+    for key in local_sd:
+        local_sd[key] = cw * local_sd[key].to(device) + sum(
+            [sd[key].to(device) * cw for i, sd in enumerate(received_models)]
+        )
+
+    # update server model with aggregated models
+    rank_model.load_state_dict(local_sd)
+
+
 def main(argv):
     # Init
     rank = 0  # compute index of this node
-    test_freq = 2500  # after how many it to eval test set
+    test_freq = 1000  # after how many it to eval test set
     time_per_batch = 0.1 * 100  # estimated time per batch in seconds
     time_in_standby = 0
     standby_period = 900  # how long to standby if necessary
     plot = False
+    test_losses = []
     constraint_function = lambda: constraint_func(paseos_instance, groundstations)
     args = parse_args(argv)
     paseos.set_log_level("INFO")
+    device = "cuda:" + str(rank) if args.cuda and torch.cuda.is_available() else "cpu"
     args.pretrained = False
+
+    # Init MPI
+    comm = MPI.COMM_WORLD
+    rank = comm.Get_rank()
+    other_ranks = [x for x in range(comm.Get_size()) if x != rank]
+    print(f"Started rank {rank}, other ranks are {other_ranks}")
 
     # Init training
     (
@@ -100,12 +124,12 @@ def main(argv):
         lr_scheduler,
         last_epoch,
         train_dataloader_iter,
-    ) = init_training(args)
+    ) = init_training(args, rank)
 
     # Init paseos
-    paseos_instance, local_actor, groundstations = init_paseos(rank)
+    paseos_instance, local_actor, groundstations = init_paseos(rank, comm.Get_size())
 
-    if plot:
+    if plot and rank == 0:
         plotter = paseos.plot(paseos_instance, paseos.PlotType.SpacePlot)
 
     # Training loop
@@ -114,7 +138,9 @@ def main(argv):
     while batch_idx < args.epochs:
         if batch_idx % 100 == 0:
             print(
-                f"Rank {rank} - Temperature[C]: {local_actor.temperature_in_K - 273.15:.2f}, Battery SoC: {local_actor.state_of_charge:.2f}"
+                f"Rank {rank} - Temperature[C]: "
+                + f"{local_actor.temperature_in_K - 273.15:.2f},"
+                + f"Battery SoC: {local_actor.state_of_charge:.2f}"
             )
             # print(f"PASEOS advancing time by {time_per_batch}s.")
 
@@ -143,17 +169,22 @@ def main(argv):
                 args.clip_max_norm,
             )
             # if batch_idx % 10 == 0:
-            # print(f"Training one batch took {time.time() - start}s")
+            #     print(f"Training one batch took {time.time() - start}s")
 
             if batch_idx % test_freq == 0:
-                print(f"Evaluating test set")
-                print(f"Previous learning rate: {optimizer.param_groups[0]['lr']}")
+                print(f"Rank {rank} - Evaluating test set")
+                print(
+                    f"Rank {rank} - Previous learning rate: {optimizer.param_groups[0]['lr']}"
+                )
                 start = time.time()
                 loss = test_epoch(batch_idx, test_dataloader, net, criterion)
-                print(f"Test evaluation took {time.time() - start}s")
+                test_losses.append(loss.item())
+                print(f"Rank {rank} - Test evaluation took {time.time() - start}s")
 
                 lr_scheduler.step(loss)
-                print(f"New learning rate: {optimizer.param_groups[0]['lr']}")
+                print(
+                    f"Rank {rank} - New learning rate: {optimizer.param_groups[0]['lr']}"
+                )
 
                 is_best = loss < best_loss
                 best_loss = min(loss, best_loss)
@@ -169,18 +200,42 @@ def main(argv):
                             "lr_scheduler": lr_scheduler.state_dict(),
                         },
                         is_best,
+                        filename="checkpoint_rank" + str(rank) + ".pth.tar",
                     )
+
+                # Wait for all ranks to evaluate the test set again
+                comm.Barrier()
+                print(f"Rank {rank} waiting to share models.")
+                sys.stdout.flush()
+
+                other_models = []
+                # Load other models
+                for other_rank in other_ranks:
+                    state_dict = torch.load(
+                        "checkpoint_rank" + str(other_rank) + ".pth.tar",
+                        map_location=device,
+                    )["state_dict"]
+                    other_models.append(state_dict)
+
+                # Aggregate
+                aggregate(net, other_models, device)
+                print(f"Rank {rank} finished aggregating models.")
+                sys.stdout.flush()
+
             batch_idx += 1
         else:
             print(
-                f"Rank {rank} standing by - Temperature[C]: {local_actor.temperature_in_K - 273.15:.2f}, Battery SoC: {local_actor.state_of_charge:.2f}"
+                f"Rank {rank} standing by - Temperature[C]: "
+                + f"{local_actor.temperature_in_K - 273.15:.2f},"
+                + f"Battery SoC: {local_actor.state_of_charge:.2f}"
             )
 
-        if plot and batch_idx % 10 == 0:
+        if plot and batch_idx % 10 == 0 and rank == 0:
             plotter.update(paseos_instance)
 
     paseos_instance.save_status_log_csv("results/" + str(rank) + ".csv")
-    create_plots(paseos_instances=[paseos_instance])
+    create_plots(paseos_instances=[paseos_instance], rank=rank)
+    np.savetxt("loss_rank" + str(rank) + ".csv", np.array(test_losses), delimiter=",")
 
 
 if __name__ == "__main__":

@@ -90,7 +90,7 @@ def init_paseos(rank, N_ranks):
             elevation=station[3],
             minimum_altitude_angle=5,
         )
-        paseos_instance.add_known_actor(gs_actor)
+        # paseos_instance.add_known_actor(gs_actor)
         groundstation_actors.append(gs_actor)
 
     return (paseos_instance, local_actor, groundstation_actors)

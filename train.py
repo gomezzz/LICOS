@@ -97,6 +97,7 @@ def init_training(args, rank):
 
 
 def train_one_batch(
+    rank,
     model,
     criterion,
     train_dataloader,
@@ -135,6 +136,7 @@ def train_one_batch(
 
     if batch_idx % 100 == 0:
         print(
+            f"Rank {rank} - "
             f"Training batch {batch_idx}: ["
             f'\tLoss: {out_criterion["loss"].item():.3f} |'
             f'\tMSE loss: {out_criterion["mse_loss"].item():.3f} |'
@@ -181,7 +183,7 @@ def train_one_epoch(
             )
 
 
-def test_epoch(epoch, test_dataloader, model, criterion):
+def test_epoch(rank, epoch, test_dataloader, model, criterion):
     model.eval()
     device = next(model.parameters()).device
 
@@ -202,6 +204,7 @@ def test_epoch(epoch, test_dataloader, model, criterion):
             mse_loss.update(out_criterion["mse_loss"])
 
     print(
+        f"Rank {rank} - "
         f"Test epoch {epoch}: Average losses:"
         f"\tLoss: {loss.avg:.3f} |"
         f"\tMSE loss: {mse_loss.avg:.3f} |"

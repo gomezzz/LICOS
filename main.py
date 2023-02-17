@@ -101,6 +101,7 @@ def main(argv):
     standby_period = 900  # how long to standby if necessary
     plot = False
     test_losses = []
+    local_time_at_test = []
     constraint_function = lambda: constraint_func(paseos_instance, groundstations)
     args = parse_args(argv)
     paseos.set_log_level("INFO")
@@ -179,6 +180,9 @@ def main(argv):
                 start = time.time()
                 loss = test_epoch(batch_idx, test_dataloader, net, criterion)
                 test_losses.append(loss.item())
+                local_time_at_test.append(
+                    paseos_instance.local_actor.local_time.mjd2000()
+                )
                 print(f"Rank {rank} - Test evaluation took {time.time() - start}s")
 
                 lr_scheduler.step(loss)
@@ -235,7 +239,14 @@ def main(argv):
 
     paseos_instance.save_status_log_csv("results/" + str(rank) + ".csv")
     create_plots(paseos_instances=[paseos_instance], rank=rank)
-    np.savetxt("loss_rank" + str(rank) + ".csv", np.array(test_losses), delimiter=",")
+    np.savetxt(
+        "results/loss_rank" + str(rank) + ".csv", np.array(test_losses), delimiter=","
+    )
+    np.savetxt(
+        "results/time_at_loss_rank" + str(rank) + ".csv",
+        np.array(local_time_at_test),
+        delimiter=",",
+    )
 
 
 if __name__ == "__main__":

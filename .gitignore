@@ -133,8 +133,7 @@ paseos
 compressai
 results
 results*
-checkpoint_best_loss.pth.tar
-checkpoint.pth.tar
+*.pth.tar
 .vscode/settings.json
 .tar
 .csv

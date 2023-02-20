@@ -5,6 +5,7 @@ from pathlib import Path
 
 import torch
 import numpy as np
+import pykep as pk
 import paseos
 from mpi4py import MPI
 
@@ -47,6 +48,7 @@ def constraint_func(paseos_instance: paseos.PASEOS, actors_to_track):
 def decide_on_activity(
     paseos_instance: paseos.PASEOS,
     timestep,
+    timestep_for_comms,
     time_in_standby,
     standby_period,
     time_since_last_update,
@@ -60,8 +62,21 @@ def decide_on_activity(
     Returns:
         activity,power_consumption
     """
+    has_comm_window = False
+    window_end = pk.epoch(
+        paseos_instance.local_actor.local_time.mjd2000 + timestep_for_comms * pk.SEC2DAY
+    )
+    for actors in paseos_instance.known_actors.items():
+        if paseos_instance.local_actor.is_in_line_of_sight(
+            actors[1], epoch=paseos_instance.local_actor.local_time
+        ) and paseos_instance.local_actor.is_in_line_of_sight(
+            actors[1], epoch=window_end
+        ):
+            has_comm_window = True
+            break
     if (
-        time_since_last_update > 900
+        has_comm_window
+        and time_since_last_update > 900
         and len(paseos_instance.known_actors) > 0
         and paseos_instance.local_actor.state_of_charge > 0.1
         and paseos_instance.local_actor.temperature_in_K < 273.15 + 45
@@ -198,7 +213,6 @@ def eval_test_set(
 def main(argv):
     # Init
     rank = 0  # compute index of this node
-    test_freq = 1000  # after how many it to eval test set
     time_per_batch = 0.1 * 100  # estimated time per batch in seconds
     assert time_per_batch < 30, "For a high time per batch you may miss comms windows?"
     time_for_comms = 60
@@ -219,6 +233,7 @@ def main(argv):
     rank = comm.Get_rank()
     other_ranks = [x for x in range(comm.Get_size()) if x != rank]
     print(f"Started rank {rank}, other ranks are {other_ranks}")
+    sys.stdout.flush()
 
     # Remove any prior lock
     if rank == 0 and os.path.exists(".mpi_lock"):
@@ -242,8 +257,14 @@ def main(argv):
         train_dataloader_iter,
     ) = init_training(args, rank)
 
+    print(f"Rank {rank} - Init training")
+    sys.stdout.flush()
+
     # Init paseos
     paseos_instance, local_actor, groundstations = init_paseos(rank, comm.Get_size())
+
+    print(f"Rank {rank} - Init PASEOS")
+    sys.stdout.flush()
 
     if plot and rank == 0:
         plotter = paseos.plot(paseos_instance, paseos.PlotType.SpacePlot)
@@ -258,11 +279,13 @@ def main(argv):
                 + f"{local_actor.temperature_in_K - 273.15:.2f},"
                 + f"Battery SoC: {local_actor.state_of_charge:.2f}"
             )
+            sys.stdout.flush()
             # print(f"PASEOS advancing time by {time_per_batch}s.")
 
         activity, power_consumption, time_in_standby = decide_on_activity(
             paseos_instance,
             time_per_batch,
+            time_for_comms,
             time_in_standby,
             standby_period,
             time_since_last_update,
@@ -382,4 +405,5 @@ def main(argv):
 
 
 if __name__ == "__main__":
+    print("Starting...")
     main(sys.argv[1:])

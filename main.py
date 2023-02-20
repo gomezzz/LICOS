@@ -219,6 +219,8 @@ def main(argv):
     time_in_standby = 0
     time_since_last_update = 0
     standby_period = 900  # how long to standby if necessary
+    MPI_sync_period = 300  # After how many seconds we wait synchronize instance clocks
+
     plot = False
     test_losses = []
     local_time_at_test = []
@@ -262,6 +264,7 @@ def main(argv):
 
     # Init paseos
     paseos_instance, local_actor, groundstations = init_paseos(rank, comm.Get_size())
+    time_of_last_sync = local_actor.local_time.mjd2000 * pk.DAY2SEC
 
     print(f"Rank {rank} - Init PASEOS")
     sys.stdout.flush()
@@ -273,6 +276,14 @@ def main(argv):
     best_loss = float("inf")
     batch_idx = 0
     while batch_idx < args.epochs:
+        if (
+            local_actor.local_time.mjd2000 * pk.DAY2SEC - time_of_last_sync
+        ) > MPI_sync_period:
+            print(f"Rank {rank} waiting for sync.")
+            sys.stdout.flush()
+            comm.Barrier()
+            time_of_last_sync = local_actor.local_time.mjd2000 * pk.DAY2SEC
+
         if batch_idx % 100 == 0:
             print(
                 f"Rank {rank} - Temperature[C]: "

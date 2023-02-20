@@ -138,10 +138,10 @@ def train_one_batch(
         print(
             f"Rank {rank} - "
             f"Training batch {batch_idx}: ["
-            f'\tLoss: {out_criterion["loss"].item():.3f} |'
-            f'\tMSE loss: {out_criterion["mse_loss"].item():.3f} |'
-            f'\tBpp loss: {out_criterion["bpp_loss"].item():.2f} |'
-            f"\tAux loss: {aux_loss.item():.2f}"
+            f'Loss: {out_criterion["loss"].item():.3f} |'
+            f'MSE loss: {out_criterion["mse_loss"].item():.3f} |'
+            f'Bpp loss: {out_criterion["bpp_loss"].item():.2f} |'
+            f"Aux loss: {aux_loss.item():.2f}"
         )
 
     return train_dataloader_iter

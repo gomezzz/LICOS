@@ -218,8 +218,9 @@ def main(argv):
     time_for_comms = 60
     time_in_standby = 0
     time_since_last_update = 0
+    total_simulation_time = 0
     standby_period = 900  # how long to standby if necessary
-    MPI_sync_period = 300  # After how many seconds we wait synchronize instance clocks
+    MPI_sync_period = 600  # After how many seconds we wait synchronize instance clocks
 
     plot = False
     test_losses = []
@@ -275,18 +276,20 @@ def main(argv):
     # Training loop
     best_loss = float("inf")
     batch_idx = 0
-    while batch_idx < args.epochs:
+    while total_simulation_time < args.epochs:
         if (
             local_actor.local_time.mjd2000 * pk.DAY2SEC - time_of_last_sync
         ) > MPI_sync_period:
-            print(f"Rank {rank} waiting for sync.")
+            print(f"Rank {rank} waiting for sync", end=" ")
             sys.stdout.flush()
             comm.Barrier()
             time_of_last_sync = local_actor.local_time.mjd2000 * pk.DAY2SEC
+            if rank == 0:
+                print()
 
         if batch_idx % 100 == 0:
             print(
-                f"Rank {rank} - Temperature[C]: "
+                f"Rank {rank} - {str(paseos_instance.local_actor.local_time)} - Temperature[C]: "
                 + f"{local_actor.temperature_in_K - 273.15:.2f},"
                 + f"Battery SoC: {local_actor.state_of_charge:.2f}"
             )
@@ -401,6 +404,10 @@ def main(argv):
 
         if plot and batch_idx % 10 == 0 and rank == 0:
             plotter.update(paseos_instance)
+
+        total_simulation_time = (
+            paseos_instance._state.time - paseos_instance._cfg.sim.start_time
+        )
 
     paseos_instance.save_status_log_csv("results/" + str(rank) + ".csv")
     create_plots(paseos_instances=[paseos_instance], rank=rank)

@@ -13,6 +13,7 @@ channels:
    - pykep
    - python=3.10
    - pytorch
+   - rasterio 
    - scipy
    - scikit-spatial
    - skyfield

@@ -12,6 +12,7 @@ from compressai.datasets import ImageFolder
 from compressai.losses import RateDistortionLoss
 
 from utils import AverageMeter, CustomDataParallel, configure_optimizers
+from l0_image_folder import L0ImageFolder
 
 
 def init_training(args, rank):
@@ -37,9 +38,13 @@ def init_training(args, rank):
         [transforms.CenterCrop(args.patch_size), transforms.ToTensor()]
     )
 
-    train_dataset = ImageFolder(args.dataset, split="train", transform=train_transforms)
-    test_dataset = ImageFolder(args.dataset, split="test", transform=test_transforms)
-
+    if args.dataset.split(os.sep)[-1] != "my_tif_dir":
+        train_dataset = ImageFolder(args.dataset, split="train", transform=train_transforms)
+        test_dataset = ImageFolder(args.dataset, split="test", transform=test_transforms)
+    else:
+        train_dataset = L0ImageFolder(args.dataset, 42, 0.8, args.l0_format, preloaded=True, split="train", transform=train_transforms)
+        test_dataset = L0ImageFolder(args.dataset, 42, 0.8, args.l0_format,  preloaded=True, split="test", transform=test_transforms)
+    
     device = "cuda:" + str(rank) if args.cuda and torch.cuda.is_available() else "cpu"
 
     train_dataloader = DataLoader(

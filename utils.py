@@ -124,6 +124,13 @@ def parse_args(argv):
         type=float,
         help="gradient clipping max norm (default: %(default)s",
     )
+    parser.add_argument(
+        "--l0_format",
+        type=str,
+        default="raw",
+        help="L0 dataset format. It can be ""raw"", ""merged"".",
+    )
+
     parser.add_argument("--checkpoint", type=str, help="Path to a checkpoint")
     args = parser.parse_args(argv)
     return args

@@ -128,3 +128,10 @@ dmypy.json
 # Pyre type checker
 .pyre/
 data
+external
+paseos
+compressai
+results
+checkpoint_best_loss.pth.tar
+checkpoint.pth.tar
+.vscode/settings.json

@@ -130,6 +130,26 @@ def parse_args(argv):
         default="raw",
         help="L0 dataset format. It can be ""raw"", ""merged"".",
     )
+    parser.add_argument(
+        "--seed",
+        type=int,
+        default=42,
+        help="Seed to automatically split train/test. Used only for l0 data.",
+    )
+
+    parser.add_argument(
+        "--train_split_percentage",
+        type=float,
+        default=0.8,
+        help="Percentage of train partition. Used only for l0 data.",
+    )
+
+    parser.add_argument(
+        "--preloaded",
+        type=store_true,
+        default=True,
+        help="If used, data are preloaded.",
+    )
 
     parser.add_argument("--checkpoint", type=str, help="Path to a checkpoint")
     args = parser.parse_args(argv)

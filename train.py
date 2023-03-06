@@ -42,8 +42,8 @@ def init_training(args, rank):
         train_dataset = ImageFolder(args.dataset, split="train", transform=train_transforms)
         test_dataset = ImageFolder(args.dataset, split="test", transform=test_transforms)
     else:
-        train_dataset = L0ImageFolder(args.dataset, 42, 0.8, args.l0_format, preloaded=True, split="train", transform=train_transforms)
-        test_dataset = L0ImageFolder(args.dataset, 42, 0.8, args.l0_format,  preloaded=True, split="test", transform=test_transforms)
+        train_dataset = L0ImageFolder(args.dataset, args.seed, args.train_split_percentage, args.l0_format, preloaded=args.preloaded, split="train", transform=train_transforms)
+        test_dataset = L0ImageFolder(args.dataset, args.seed, args.train_split_percentage, args.l0_format, preloaded=args.preloaded, split="test", transform=test_transforms)
     
     device = "cuda:" + str(rank) if args.cuda and torch.cuda.is_available() else "cpu"
 

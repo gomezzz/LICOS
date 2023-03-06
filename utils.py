@@ -130,12 +130,6 @@ def parse_args(argv):
         default="raw",
         help="L0 dataset format. It can be ""raw"", ""merged"".",
     )
-    parser.add_argument(
-        "--seed",
-        type=int,
-        default=42,
-        help="Seed to automatically split train/test. Used only for l0 data.",
-    )
 
     parser.add_argument(
         "--train_split_percentage",
@@ -146,8 +140,8 @@ def parse_args(argv):
 
     parser.add_argument(
         "--preloaded",
-        type=store_true,
-        default=True,
+        action="store_true",
+        default=False,
         help="If used, data are preloaded.",
     )
 

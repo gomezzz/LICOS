@@ -8,6 +8,7 @@ import random
 from glob import glob
 from torchvision import transforms
 from l0_utils import BAND_LIST, BAND_SPATIAL_RESOLUTION_DICT, image_band_upsample
+import torch
 
 @register_dataset("L0ImageFolder")
 class L0ImageFolder(Dataset):
@@ -83,7 +84,7 @@ class L0ImageFolder(Dataset):
         """
         transform_list=[]
 
-        for transform in train_transforms.transforms:
+        for transform in transform.transforms:
             if str(transform) != "ToTensor()":
                 transform_list.append(transform)
 
@@ -130,7 +131,7 @@ class L0ImageFolder(Dataset):
         """
         
         with rasterio.open(band_path) as src:
-            return torch.from_numpy(src.read(1).astype(np.float32))
+            return torch.from_numpy(src.read(1).astype(np.float32)).unsqueeze(0)
 
 
     def __getitem__(self, index):

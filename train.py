@@ -13,7 +13,7 @@ from compressai.losses import RateDistortionLoss
 
 from utils import AverageMeter, CustomDataParallel, configure_optimizers
 from l0_image_folder import L0ImageFolder
-
+import os
 
 def init_training(args, rank):
     """Initializes training

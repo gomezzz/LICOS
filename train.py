@@ -38,12 +38,12 @@ def init_training(args, rank):
         [transforms.CenterCrop(args.patch_size), transforms.ToTensor()]
     )
 
-    if args.dataset.split(os.sep)[-1] != "my_tif_dir":
+    if args.use_l0_data:
         train_dataset = ImageFolder(args.dataset, split="train", transform=train_transforms)
         test_dataset = ImageFolder(args.dataset, split="test", transform=test_transforms)
     else:
-        train_dataset = L0ImageFolder(args.dataset, args.seed, args.train_split_percentage, args.l0_format, preloaded=args.preloaded, split="train", transform=train_transforms)
-        test_dataset = L0ImageFolder(args.dataset, args.seed, args.train_split_percentage, args.l0_format, preloaded=args.preloaded, split="test", transform=test_transforms)
+        train_dataset = L0ImageFolder(root=args.dataset, seed=args.seed, test_train_split=args.train_split_percentage, l0_format=args.l0_format, target_resolution_merged_m=args.target_resolution_merged_m, preloaded=args.preloaded, split="train", transform=train_transforms)
+        test_dataset = L0ImageFolder(root=args.dataset, seed=args.seed, test_train_split=args.train_split_percentage, l0_format=args.l0_format,  target_resolution_merged_m=args.target_resolution_merged_m, preloaded=args.preloaded, split="test", transform=test_transforms)
     
     device = "cuda:" + str(rank) if args.cuda and torch.cuda.is_available() else "cpu"
 

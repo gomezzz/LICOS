@@ -124,6 +124,14 @@ def parse_args(argv):
         type=float,
         help="gradient clipping max norm (default: %(default)s",
     )
+
+    parser.add_argument(
+        "--use_l0_data",
+        action="store_true",
+        default=False,,
+        help="If specified, l0 data are used.",
+    )
+
     parser.add_argument(
         "--l0_format",
         type=str,
@@ -143,6 +151,13 @@ def parse_args(argv):
         action="store_true",
         default=False,
         help="If used, data are preloaded.",
+    )
+
+    parser.add_argument(
+        "--target_resolution_merged_m",
+        action="store_true",
+        default=False,
+        help="For l0 data, image target resolution for merged mode.",
     )
 
     parser.add_argument("--checkpoint", type=str, help="Path to a checkpoint")

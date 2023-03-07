@@ -1,4 +1,5 @@
 from torch.nn import Upsample
+import torch 
 
 # Sentinel-2 band names
 BAND_LIST=["B01", "B02", "B03", "B04", "B05", "B06", "B07", "B08", "B09", "B8A", "B10", "B11", "B12"]
@@ -6,13 +7,19 @@ BAND_LIST=["B01", "B02", "B03", "B04", "B05", "B06", "B07", "B08", "B09", "B8A",
 # Spatial resolution of various bands
 BAND_SPATIAL_RESOLUTION_DICT=dict(zip(BAND_LIST, [60, 10, 10, 10, 20, 20, 20, 10, 60, 20, 60, 20, 20]))
 
+# Digital number max - 12 bits
+DN_MAX=2**12 - 1
 
-def image_band_upsample(img_band, band_name, upsample_mode="bilinear"): 
+#Target image shape
+IMAGE_SHAPE_DICT={10.0 : [2304, 2592], 20.0 : [1152, 1296], 60.0 : [384, 432]}
+
+def image_band_upsample(img_band, band_name, upsample_factor, upsample_mode="bilinear"): 
     """Upsample an image band to a target spatial resolution through an upsample mode.
 
     Args:
         img_band (torch.tensor): image band.
         band_name (string): band name.
+        upsample_factor (int): upsample factor.
         upsample_mode (string, optional): "nearest", "bilinear", "bicubic". Defaults to blinear.
 
     Raises:
@@ -22,26 +29,16 @@ def image_band_upsample(img_band, band_name, upsample_mode="bilinear"):
     Returns:
         torch.tensor: upsampled band.
     """
-    upsample_factor=BAND_SPATIAL_RESOLUTION_DICT[band_name]/10
-    if upsample_factor  <= 1.0:
-        return img_band
-    
-    if not(band_name in BAND_LIST):
-        raise ValueError("Unsupported band name: "+band_name+".")
+
+    if not(upsample_mode in ['nearest', 'bilinear', 'bicubic']):
+        raise ValueError("Upsample mode "+upsample_mode+" not supported. Please, choose among: ""nearest"", ""bilinear"", ""bicubic"".")
         
     if BAND_SPATIAL_RESOLUTION_DICT[band_name] == 60:
         #Recreating a square image (TODO: this is a horrible appproach. To be improved.)
         img_band=img_band[:,::3]
-    
-    if not(upsample_mode in ['nearest', 'bilinear', 'bicubic']):
-        raise ValueError("Upsample mode "+upsample_mode+" not supported. Please, choose among: ""nearest"", ""bilinear"", ""bicubic"".")
 
-    if upsample_factor != int(upsample_factor):
-        print("Warning. Upsample factor truncanted from "+upsample_factor+" to "+int(upsample_factor)+".")
-
-    upsample_factor=int(upsample_factor)
     if upsample_mode == "nearest":
-        upsample_method=Upsample(scale_factor=upsample_factor, mode=upsample_mode) #, align_corners=True)
+        upsample_method=Upsample(scale_factor=upsample_factor, mode=upsample_mode) 
     else:
         upsample_method=Upsample(scale_factor=upsample_factor, mode=upsample_mode, align_corners=True)
         
@@ -49,4 +46,39 @@ def image_band_upsample(img_band, band_name, upsample_mode="bilinear"):
         return upsample_method(img_band.unsqueeze(0).unsqueeze(0)).squeeze(0).squeeze(0)
 
 
+def image_band_reshape(img_band, band_name, target_resolution, upsample_mode="bilinear"):
+    """Reshape a band to a target resolution.
 
+    Args:
+        img_band (torch.tensor): image band.
+        band_name (str): band name.
+        target_resolution (float): target resolution in m.
+        upsample_mode (str, optional):upsample_mode (string, optional): "nearest", "bilinear", "bicubic". Defaults to blinear.
+
+    Raises:
+        ValueError: _description_
+
+    Returns:
+        _type_: _description_
+    """
+    if not(band_name in BAND_LIST):
+        raise ValueError("Unsupported band name: "+band_name+".")
+
+    # Calculating upsample factor
+    upsample_factor=BAND_SPATIAL_RESOLUTION_DICT[band_name]/target_resolution
+
+    if upsample_factor > 1: 
+        return image_band_upsample(img_band, band_name, int(upsample_factor), upsample_mode="bilinear")
+
+    elif upsample_factor < 1:
+        downsample_factor = int(1 / upsample_factor)
+        return img_band[::downsample_factor, ::downsample_factor]
+
+    else:
+        if BAND_SPATIAL_RESOLUTION_DICT[band_name] == 60:
+            #Downsampling image across-track to 60 m
+            return img_band[::,::3]
+        else:
+            return img_band
+
+    return img_band

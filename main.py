@@ -30,7 +30,7 @@ def constraint_func(paseos_instance: paseos.PASEOS, actors_to_track):
 
     # Update known actors
     local_t = paseos_instance.local_actor.local_time
-    paseos_instance.emtpy_known_actors()
+    paseos_instance.empty_known_actors()
     for actor in actors_to_track:
         if paseos_instance.local_actor.is_in_line_of_sight(actor, local_t):
             paseos_instance.add_known_actor(actor)

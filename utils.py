@@ -128,7 +128,7 @@ def parse_args(argv):
     parser.add_argument(
         "--use_l0_data",
         action="store_true",
-        default=False,,
+        default=False,
         help="If specified, l0 data are used.",
     )
 
@@ -155,8 +155,8 @@ def parse_args(argv):
 
     parser.add_argument(
         "--target_resolution_merged_m",
-        action="store_true",
-        default=False,
+        type=float,
+        default=20,
         help="For l0 data, image target resolution for merged mode.",
     )
 

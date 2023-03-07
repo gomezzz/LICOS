@@ -1,4 +1,4 @@
-from torch.nn import Upsample
+from torch.nn.functional import interpolate
 import torch 
 
 # Sentinel-2 band names
@@ -27,23 +27,21 @@ def image_band_upsample(img_band, band_name, upsample_factor, upsample_mode="bil
         ValueError: unsupported upsample mode.
 
     Returns:
-        torch.tensor: upsampled band.
     """
 
     if not(upsample_mode in ['nearest', 'bilinear', 'bicubic']):
         raise ValueError("Upsample mode "+upsample_mode+" not supported. Please, choose among: ""nearest"", ""bilinear"", ""bicubic"".")
         
     if BAND_SPATIAL_RESOLUTION_DICT[band_name] == 60:
-        #Recreating a square image (TODO: this is a horrible appproach. To be improved.)
-        img_band=img_band[:,::3]
+        #Using different upsampling factors since 60 m bands
+        #have 60 m resolution vertically, but 20 m resolution horizontally.
+        upsample_factor=(upsample_factor, upsample_factor/3)
 
-    if upsample_mode == "nearest":
-        upsample_method=Upsample(scale_factor=upsample_factor, mode=upsample_mode) 
-    else:
-        upsample_method=Upsample(scale_factor=upsample_factor, mode=upsample_mode, align_corners=True)
-        
     with torch.no_grad():
-        return upsample_method(img_band.unsqueeze(0).unsqueeze(0)).squeeze(0).squeeze(0)
+        if upsample_mode == "nearest":
+            return interpolate(img_band.unsqueeze(0).unsqueeze(0),scale_factor=upsample_factor, mode=upsample_mode).squeeze(0).squeeze(0) 
+        else:
+            return interpolate(img_band.unsqueeze(0).unsqueeze(0),scale_factor=upsample_factor, mode=upsample_mode, align_corners=True).squeeze(0).squeeze(0)
 
 
 def image_band_reshape(img_band, band_name, target_resolution, upsample_mode="bilinear"):
@@ -56,10 +54,10 @@ def image_band_reshape(img_band, band_name, target_resolution, upsample_mode="bi
         upsample_mode (str, optional):upsample_mode (string, optional): "nearest", "bilinear", "bicubic". Defaults to blinear.
 
     Raises:
-        ValueError: _description_
+        ValueError: Unsupported band name
 
     Returns:
-        _type_: _description_
+        torch.tensor: resampled band.
     """
     if not(band_name in BAND_LIST):
         raise ValueError("Unsupported band name: "+band_name+".")
@@ -76,9 +74,8 @@ def image_band_reshape(img_band, band_name, target_resolution, upsample_mode="bi
 
     else:
         if BAND_SPATIAL_RESOLUTION_DICT[band_name] == 60:
-            #Downsampling image across-track to 60 m
+            #Downsampling image across-track to 60 m.
+            #60m-bands have 60 m resolution vertically but 20 m resolution horizontally.
             return img_band[::,::3]
         else:
             return img_band
-
-    return img_band

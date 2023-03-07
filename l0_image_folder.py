@@ -19,7 +19,7 @@ class L0ImageFolder(Dataset):
     """
 
     def __init__(self, root, seed, test_train_split, l0_format, target_resolution_merged_m = 20.0, transform=None, preloaded=True, split="train"):
-        """_summary_
+        """Init function for L0ImageFolder.
 
         Args:
             root (string): root directory of the dataset

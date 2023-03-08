@@ -15,6 +15,7 @@ channels:
    - pytorch
    - rasterio 
    - scipy
+   - scikit-learn
    - scikit-spatial
    - skyfield
    - torchvision

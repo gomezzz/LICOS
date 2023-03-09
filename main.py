@@ -76,6 +76,9 @@ def main(argv):
     print(f"Rank {rank} - Init PASEOS")
     sys.stdout.flush()
 
+    print(f"Rank {rank} - Init PASEOS")
+    sys.stdout.flush()
+
     if plot and rank == 0:
         plotter = paseos.plot(paseos_instance, paseos.PlotType.SpacePlot)
 

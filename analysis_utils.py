@@ -8,7 +8,17 @@ def get_closest_entry(df, t, id):
 
 
 def get_analysis_df(df, timestep=60, orbital_period=1):
+    """Performs some analysis on the collected data.
 
+    Args:
+        df (pandas df): pandas dataframe to analyze
+        timestep (int, optional): _description_. Defaults to 60.
+        orbital_period (int, optional): Orbital period of the satellites, used
+        to convert to orbits instead of seconds. Defaults to 1.
+
+    Returns:
+        pandas df: Analysis data frame
+    """
     t = np.round(np.linspace(0, df.Time.max(), int(df.Time.max() // timestep)))
     sats = df.ID.unique()
     df["known_actors"] = pd.Categorical(df.known_actors)

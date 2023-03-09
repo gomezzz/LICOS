@@ -100,5 +100,5 @@ def get_constellation(altitude, inclination, nSats, nPlanes, t0, verbose=True):
         satellites.append((pos, v))
 
     if verbose:
-        print("Done!")
+        print("Done creating constellation!")
     return planet_list, satellites, period

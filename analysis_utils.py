@@ -3,6 +3,16 @@ import numpy as np
 
 
 def get_closest_entry(df, t, id):
+    """Finds the entry closest to the provided time.
+
+    Args:
+        df (pandas df): DataFrame to look in
+        t (float): timestamp
+        id (str): Name of the column to search
+
+    Returns:
+        value: Value that was closest
+    """
     df_id = df[df.ID == id]
     return df_id.iloc[(df_id["Time"] - t).abs().argsort().iloc[:1]]
 

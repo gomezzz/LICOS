@@ -71,6 +71,13 @@ def parse_args(argv):
         help="Number of epochs (default: %(default)s)",
     )
     parser.add_argument(
+        "-t",
+        "--simulation_time",
+        default=100,
+        type=float,
+        help="Simulation runtime in seconds (default: %(default)s)",
+    )
+    parser.add_argument(
         "-lr",
         "--learning-rate",
         default=1e-4,

@@ -14,7 +14,7 @@ from compressai.losses import RateDistortionLoss
 from utils import AverageMeter, CustomDataParallel, configure_optimizers
 
 
-def init_training(args):
+def init_training(args, rank):
     """Initializes training
 
     Args:
@@ -40,14 +40,15 @@ def init_training(args):
     train_dataset = ImageFolder(args.dataset, split="train", transform=train_transforms)
     test_dataset = ImageFolder(args.dataset, split="test", transform=test_transforms)
 
-    device = "cuda" if args.cuda and torch.cuda.is_available() else "cpu"
+    device = "cuda:" + str(rank) if args.cuda and torch.cuda.is_available() else "cpu"
 
     train_dataloader = DataLoader(
         train_dataset,
         batch_size=args.batch_size,
         num_workers=args.num_workers,
         shuffle=True,
-        pin_memory=(device == "cuda"),
+        pin_memory=(device == "cuda:" + str(rank)),
+        pin_memory_device=device,
     )
 
     train_dataloader_iter = iter(train_dataloader)
@@ -57,14 +58,16 @@ def init_training(args):
         batch_size=args.test_batch_size,
         num_workers=args.num_workers,
         shuffle=False,
-        pin_memory=(device == "cuda"),
+        pin_memory=(device == "cuda:" + str(rank)),
+        pin_memory_device=device,
     )
 
     net = image_models[args.model](quality=1, pretrained=args.pretrained)
     net = net.to(device)
 
-    if args.cuda and torch.cuda.device_count() > 1:
-        net = CustomDataParallel(net)
+    # if args.cuda and torch.cuda.device_count() > 1:
+    #     print("Using multiple device CustomDataParallel")
+    #     net = CustomDataParallel(net)
 
     optimizer, aux_optimizer = configure_optimizers(net, args)
     lr_scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, "min")
@@ -94,6 +97,7 @@ def init_training(args):
 
 
 def train_one_batch(
+    rank,
     model,
     criterion,
     train_dataloader,
@@ -130,8 +134,9 @@ def train_one_batch(
     aux_loss.backward()
     aux_optimizer.step()
 
-    if batch_idx % 10 == 0:
+    if batch_idx % 100 == 0:
         print(
+            f"Rank {rank} - "
             f"Training batch {batch_idx}: ["
             f'\tLoss: {out_criterion["loss"].item():.3f} |'
             f'\tMSE loss: {out_criterion["mse_loss"].item():.3f} |'
@@ -178,7 +183,7 @@ def train_one_epoch(
             )
 
 
-def test_epoch(epoch, test_dataloader, model, criterion):
+def test_epoch(rank, epoch, test_dataloader, model, criterion):
     model.eval()
     device = next(model.parameters()).device
 
@@ -199,6 +204,7 @@ def test_epoch(epoch, test_dataloader, model, criterion):
             mse_loss.update(out_criterion["mse_loss"])
 
     print(
+        f"Rank {rank} - "
         f"Test epoch {epoch}: Average losses:"
         f"\tLoss: {loss.avg:.3f} |"
         f"\tMSE loss: {mse_loss.avg:.3f} |"

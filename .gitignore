@@ -132,6 +132,9 @@ external
 paseos
 compressai
 results
-checkpoint_best_loss.pth.tar
-checkpoint.pth.tar
+results*
+*.pth.tar
 .vscode/settings.json
+.tar
+.csv
+.mpi_lock

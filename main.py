@@ -1,14 +1,16 @@
 import sys
 import time
 import os
+import warnings
 
+import toml
+from dotmap import DotMap
 import torch
 import numpy as np
 import pykep as pk
 import paseos
 from mpi4py import MPI
 
-from utils import parse_args
 from create_plots import create_plots
 from init_paseos import init_paseos
 from actor_logic import constraint_func,decide_on_activity,perform_activity
@@ -16,7 +18,7 @@ from federation_utils import update_central_model
 from train import train_one_batch, init_training, eval_test_set
 
 
-def main(argv):
+def main(cfg):
     # Init
     rank = 0  # compute index of this node
     time_per_batch = 0.1 * 100  # estimated time per batch in seconds
@@ -32,10 +34,9 @@ def main(argv):
     test_losses = []
     local_time_at_test = []
     constraint_function = lambda: constraint_func(paseos_instance, groundstations)
-    args = parse_args(argv)
     paseos.set_log_level("INFO")
-    device = "cuda:" + str(rank) if args.cuda and torch.cuda.is_available() else "cpu"
-    args.pretrained = False
+    device = "cuda:" + str(rank) if cfg.cuda and torch.cuda.is_available() else "cpu"
+    cfg.pretrained = False
 
     # Init MPI
     comm = MPI.COMM_WORLD
@@ -64,7 +65,7 @@ def main(argv):
         lr_scheduler,
         last_epoch,
         train_dataloader_iter,
-    ) = init_training(args, rank)
+    ) = init_training(cfg, rank)
 
     print(f"Rank {rank} - Init training")
     sys.stdout.flush()
@@ -86,7 +87,7 @@ def main(argv):
     # Main Training loop
     best_loss = float("inf")
     batch_idx = 0
-    while total_simulation_time < args.simulation_time:
+    while total_simulation_time < cfg.simulation_time:
 
         ################################################################################
         # Sync time between ranks to minimize divergence
@@ -207,7 +208,7 @@ def main(argv):
                 optimizer,
                 aux_optimizer,
                 batch_idx,
-                args.clip_max_norm,
+                cfg.clip_max_norm,
             )
             # if batch_idx % 10 == 0:
             #     print(f"Training one batch took {time.time() - start}s")
@@ -250,5 +251,16 @@ def main(argv):
 
 
 if __name__ == "__main__":
-    print("Starting...")
-    main(sys.argv[1:])
+    if len(sys.argv) < 2: 
+        warnings.warn("Please pass the path to a cfg file. Using default cfg")
+        path = "cfg/default_cfg.toml"
+    else:
+        path = sys.argv[1]
+    if not os.path.exists(path):
+        raise Exception(f"No cfg file found at {path}.")
+    print(f"Loading cfg from {path}")
+    with open(path) as cfg:
+        # dynamic=False inhibits automatic generation of non-existing keys
+        cfg = DotMap(toml.load(cfg), _dynamic=False)
+    print(cfg)
+    main(cfg)

@@ -15,38 +15,38 @@ from compressai.losses import RateDistortionLoss
 from utils import AverageMeter, configure_optimizers
 
 
-def init_training(args, rank):
+def init_training(cfg, rank):
     """Initializes training
 
     Args:
-        args (dict): Passed arguments / parameters
+        cfg (dict): Config of the run
 
     Returns:
         net,optimizer,aux_optimizer,criterion,train_dataloader,test_dataloader,lr_scheduler,last_epoch
     """
 
-    if args.seed is not None:
-        torch.manual_seed(args.seed)
-        random.seed(args.seed)
+    if cfg.seed is not None:
+        torch.manual_seed(cfg.seed)
+        random.seed(cfg.seed)
 
     # Training Setup
     train_transforms = transforms.Compose(
-        [transforms.RandomCrop(args.patch_size), transforms.ToTensor()]
+        [transforms.RandomCrop(cfg.patch_size), transforms.ToTensor()]
     )
 
     test_transforms = transforms.Compose(
-        [transforms.CenterCrop(args.patch_size), transforms.ToTensor()]
+        [transforms.CenterCrop(cfg.patch_size), transforms.ToTensor()]
     )
 
-    train_dataset = ImageFolder(args.dataset, split="train", transform=train_transforms)
-    test_dataset = ImageFolder(args.dataset, split="test", transform=test_transforms)
+    train_dataset = ImageFolder(cfg.dataset, split="train", transform=train_transforms)
+    test_dataset = ImageFolder(cfg.dataset, split="test", transform=test_transforms)
 
-    device = "cuda:" + str(rank) if args.cuda and torch.cuda.is_available() else "cpu"
+    device = "cuda:" + str(rank) if cfg.cuda and torch.cuda.is_available() else "cpu"
 
     train_dataloader = DataLoader(
         train_dataset,
-        batch_size=args.batch_size,
-        num_workers=args.num_workers,
+        batch_size=cfg.batch_size,
+        num_workers=cfg.num_workers,
         shuffle=True,
         pin_memory=(device == "cuda:" + str(rank)),
         pin_memory_device=device,
@@ -56,28 +56,28 @@ def init_training(args, rank):
 
     test_dataloader = DataLoader(
         test_dataset,
-        batch_size=args.test_batch_size,
-        num_workers=args.num_workers,
+        batch_size=cfg.test_batch_size,
+        num_workers=cfg.num_workers,
         shuffle=False,
         pin_memory=(device == "cuda:" + str(rank)),
         pin_memory_device=device,
     )
 
-    net = image_models[args.model](quality=1, pretrained=args.pretrained)
+    net = image_models[cfg.model](quality=1, pretrained=cfg.pretrained)
     net = net.to(device)
 
-    # if args.cuda and torch.cuda.device_count() > 1:
+    # if cfg.cuda and torch.cuda.device_count() > 1:
     #     print("Using multiple device CustomDataParallel")
     #     net = CustomDataParallel(net)
 
-    optimizer, aux_optimizer = configure_optimizers(net, args)
+    optimizer, aux_optimizer = configure_optimizers(net, cfg)
     lr_scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, "min")
-    criterion = RateDistortionLoss(lmbda=args.lmbda)
+    criterion = RateDistortionLoss(lmbda=cfg.lmbda)
 
     last_epoch = 0
-    if args.checkpoint:  # load from previous checkpoint
-        print("Loading", args.checkpoint)
-        checkpoint = torch.load(args.checkpoint, map_location=device)
+    if cfg.checkpoint:  # load from previous checkpoint
+        print("Loading", cfg.checkpoint)
+        checkpoint = torch.load(cfg.checkpoint, map_location=device)
         last_epoch = checkpoint["epoch"] + 1
         net.load_state_dict(checkpoint["state_dict"])
         optimizer.load_state_dict(checkpoint["optimizer"])

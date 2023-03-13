@@ -1,6 +1,7 @@
 import torch
 import random
 import torch
+import time
 
 import torch.optim as optim
 
@@ -14,7 +15,6 @@ from compressai.losses import RateDistortionLoss
 from utils import AverageMeter, CustomDataParallel, configure_optimizers
 from l0_image_folder import L0ImageFolder
 from model_utils import get_model
-
 
 def init_training(args, rank):
     """Initializes training
@@ -142,6 +142,22 @@ def train_one_batch(
     batch_idx,
     clip_max_norm,
 ):
+    """Trains the model on one batch
+
+    Args:
+        rank (int): Rank index
+        model (torch.model): model to train
+        criterion (): Loss criteration, see compressai docs
+        train_dataloader (torch.dataloader): loader for training data
+        train_dataloader_iter (iterator): current iterator on the loader
+        optimizer (torch.optimizer): optimizer for gradients
+        aux_optimizer (torch.optimizer): auxiliary loss optimizer
+        batch_idx (int): index of current batch
+        clip_max_norm (): gradient clipping thingy
+
+    Returns:
+        iterator: the updated training data loader
+    """
     model.train()
     device = next(model.parameters()).device
 
@@ -185,6 +201,17 @@ def train_one_batch(
 def train_one_epoch(
     model, criterion, train_dataloader, optimizer, aux_optimizer, epoch, clip_max_norm
 ):
+    """Train the mode for one epoch.
+
+    Args:
+        model (torch.model): model to train
+        criterion (): Loss criteration, see compressai docs
+        train_dataloader (torch.dataloader): loader for training data
+        optimizer (torch.optimizer): optimizer for gradients
+        aux_optimizer (torch.optimizer): auxiliary loss optimizer
+        epoch (int): index of current epoch
+        clip_max_norm (): gradient clipping thingy
+    """
     model.train()
     device = next(model.parameters()).device
 
@@ -219,6 +246,18 @@ def train_one_epoch(
 
 
 def test_epoch(rank, epoch, test_dataloader, model, criterion):
+    """Test the model
+
+    Args:
+        rank (int): index of the rank
+        epoch (int): index of current epoch
+        test_dataloader (torch.dataloader): loader for test data
+        model (torch.model): model to test
+        criterion (): Loss criteration, see compressai docs
+
+    Returns:
+        float: avg loss
+    """
     model.eval()
     device = next(model.parameters()).device
 
@@ -248,3 +287,49 @@ def test_epoch(rank, epoch, test_dataloader, model, criterion):
     )
 
     return loss.avg
+
+def eval_test_set(
+    rank,
+    optimizer,
+    batch_idx,
+    net,
+    criterion,
+    test_losses,
+    test_dataloader,
+    local_time_at_test,
+    paseos_instance,
+    lr_scheduler,
+    best_loss,
+):
+    """Evaluate the set
+
+    Args:
+        rank (int): Rank index
+        optimizer (torch.optimizer): optimizer for gradients
+        batch_idx (int): index of current batch
+        net (torch.model): model to train
+        criterion (): Loss criteration, see compressai docs
+        test_losses (_type_): _description_
+        teset_dataloader (torch.dataloader): loader for testing data
+        local_time_at_test (float): local paseos time at testing
+        paseos_instance (paseos): paseos instance of the rank
+        lr_scheduler (torch.scheduler): lr scheduler
+        best_loss (float): best achieved loss
+
+    Returns:
+        tuple: loss, whether best, best loss achieved
+    """
+    # print(f"Rank {rank} - Evaluating test set")
+    # print(f"Rank {rank} - Previous learning rate: {optimizer.param_groups[0]['lr']}")
+    start = time.time()
+    loss = test_epoch(rank, batch_idx, test_dataloader, net, criterion)
+    test_losses.append(loss.item())
+    local_time_at_test.append(paseos_instance._state.time)
+    # print(f"Rank {rank} - Test evaluation took {time.time() - start}s")
+
+    lr_scheduler.step(loss)
+    # print(f"Rank {rank} - New learning rate: {optimizer.param_groups[0]['lr']}")
+
+    is_best = loss < best_loss
+    best_loss = min(loss, best_loss)
+    return loss, is_best, best_loss

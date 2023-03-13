@@ -143,7 +143,7 @@ def parse_args(argv):
         "--l0_format",
         type=str,
         default="raw",
-        help="L0 dataset format. It can be " "raw" ", " "merged" ".",
+        help="L0 dataset format. It can be ""raw"", ""merged"".",
     )
 
     parser.add_argument(

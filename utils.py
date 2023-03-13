@@ -85,7 +85,7 @@ def parse_args(argv):
         help="Dataloaders threads (default: %(default)s)",
     )
     parser.add_argument(
-        "--lambda",
+        "--lmbda",
         dest="lmbda",
         type=float,
         default=1e-2,
@@ -136,7 +136,7 @@ def parse_args(argv):
         "--l0_format",
         type=str,
         default="raw",
-        help="L0 dataset format. It can be ""raw"", ""merged"".",
+        help="L0 dataset format. It can be " "raw" ", " "merged" ".",
     )
 
     parser.add_argument(

@@ -4,7 +4,7 @@ from compressai.entropy_models import EntropyBottleneck
 from torch.nn import Conv2d, ConvTranspose2d
 
 
-def get_model(model, pretrained, in_channels=3):
+def get_model(model, pretrained, in_channels=3, quality=1):
     """Get models and change ther input channels.
        Supported models include: bmshj2018-factorized, bmshj2018-factorized-relu, bmshj2018-hyperprior,
 
@@ -12,11 +12,12 @@ def get_model(model, pretrained, in_channels=3):
         model (str): model name.
         pretrained (bool): if True, pretrained version is used.
         in_channels (int, optional): number of input channels. Defaults to 3.
+        quality (int, optional): CompressAI quality parameter.
 
     Returns:
         net: adapted model
     """
-    net = image_models[model](quality=1, pretrained=pretrained)
+    net = image_models[model](quality=quality, pretrained=pretrained)
     if model in [
         "bmshj2018-factorized",
         "bmshj2018-factorized-relu",

@@ -3,7 +3,16 @@ import pandas as pd
 
 
 def get_known_actor_comms_status(values):
-    """Helper function to track comms status"""
+    """Helper function to track comms status
+
+    Args:
+        values (list of str): Names of known actors.
+
+    Returns:
+        list of int: Indices of known actors.
+    """
+
+
     vals = []
     for item in values:
         if "Svalbard" in item:
@@ -17,11 +26,14 @@ def get_known_actor_comms_status(values):
     return vals
 
 
-def create_plots(paseos_instances, rank):
+def create_plots(paseos_instances, rank, figsize=(8,2),dpi=150):
     """Creates plots from the instance
 
     Args:
-        paseos_instances (PASEOS): _description_
+        paseos_instances (PASEOS): instances to plot
+        rank (int): Index of MPI rank.
+        figsize (tuple): Size of plots.
+        dpi (int): dpi of the plots.
     """
     quantities = [
         "temperature",
@@ -39,7 +51,7 @@ def create_plots(paseos_instances, rank):
         # Dataframe for this quantity
         small_df = pd.DataFrame(columns=("Time", "ID"))
 
-        plt.figure(figsize=(8, 2), dpi=150)
+        plt.figure(figsize=figsize, dpi=dpi)
 
         # Get dat afrom all satellites and plot it
         for instance in paseos_instances:
@@ -74,7 +86,7 @@ def create_plots(paseos_instances, rank):
             plt.ylabel(item.replace("_", " "))
             if item == "known_actors":
                 plt.yticks([0, 1, 2, 3], ["None", "Svalbard", "Matera", "Maspalomas"])
-            plt.savefig("results/" + item + "_rank" + str(rank) + ".png", dpi=150)
+            plt.savefig("results/" + item + "_rank" + str(rank) + ".png", dpi=dpi)
         # Add a legend showing which satellite is which
         # plt.legend(
         #         names,

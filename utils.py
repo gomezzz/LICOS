@@ -131,6 +131,42 @@ def parse_args(argv):
         type=float,
         help="gradient clipping max norm (default: %(default)s",
     )
+
+    parser.add_argument(
+        "--use_l0_data",
+        action="store_true",
+        default=False,
+        help="If specified, l0 data are used.",
+    )
+
+    parser.add_argument(
+        "--l0_format",
+        type=str,
+        default="raw",
+        help="L0 dataset format. It can be ""raw"", ""merged"".",
+    )
+
+    parser.add_argument(
+        "--train_split_percentage",
+        type=float,
+        default=0.8,
+        help="Percentage of train partition. Used only for l0 data.",
+    )
+
+    parser.add_argument(
+        "--preloaded",
+        action="store_true",
+        default=False,
+        help="If used, data are preloaded.",
+    )
+
+    parser.add_argument(
+        "--target_resolution_merged_m",
+        type=float,
+        default=20,
+        help="For l0 data, image target resolution for merged mode.",
+    )
+
     parser.add_argument("--checkpoint", type=str, help="Path to a checkpoint")
     args = parser.parse_args(argv)
     return args

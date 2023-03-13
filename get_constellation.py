@@ -5,7 +5,8 @@ import pykep as pk
 
 
 def get_constellation(altitude, inclination, nSats, nPlanes, t0, verbose=True):
-    """Creates a constellation with the passed parameters
+    """Creates a constellation with the passed parameters. More details can be found at
+    https://github.com/esa/LADDS/blob/main/notebooks/ConstellationGeneration/ConstellationGeneration.ipynb
 
     Args:
         altitude (float): Altitude in meters.
@@ -50,6 +51,7 @@ def get_constellation(altitude, inclination, nSats, nPlanes, t0, verbose=True):
 
     plane_count = 0
 
+    # Gravitiational parameters and irrelevant parameters of pykep planets (don't affect orbit)
     mu_central_body = pk.MU_EARTH
     mu_self = 1
     radius = 1
@@ -98,5 +100,5 @@ def get_constellation(altitude, inclination, nSats, nPlanes, t0, verbose=True):
         satellites.append((pos, v))
 
     if verbose:
-        print("Done!")
+        print("Done creating constellation!")
     return planet_list, satellites, period

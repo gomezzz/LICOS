@@ -45,3 +45,20 @@ checkpoint = ""
 
 # Whether to use a pretrained model
 pretrained = false
+
+# Quality value for the model, 1 to 8
+model_quality = 1
+
+# Whether to use l0 data
+use_l0_data = false
+
+# L0 data formatting 
+# raw - as 13 individual bands
+# merged - 13 channel img
+l0_format = "raw"
+
+# For l0 data, image target resolution for merged mode.
+l0_target_resolution_merged_m = 20.0
+
+# Percentage of train partition. Used only for l0 data.",
+l0_train_test_split = 0.8

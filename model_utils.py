@@ -1,4 +1,3 @@
-import torch
 from compressai.zoo import image_models
 from compressai.entropy_models import EntropyBottleneck
 from torch.nn import Conv2d, ConvTranspose2d

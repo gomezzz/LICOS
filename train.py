@@ -16,7 +16,6 @@ from utils import AverageMeter, CustomDataParallel, configure_optimizers
 from l0_image_folder import L0ImageFolder
 
 from model_utils import get_model
-from l0_utils import get_model
 
 
 def init_training(cfg, rank):

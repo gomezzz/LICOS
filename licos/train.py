@@ -1,6 +1,5 @@
 import torch
 import random
-import time
 
 import torch.optim as optim
 

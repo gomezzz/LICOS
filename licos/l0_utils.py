@@ -100,7 +100,8 @@ def image_band_reshape(
         band_name (str): band name.
         target_resolution (float): target resolution in m.
         upsample_mode (str, optional): "nearest", "bilinear", "bicubic". Defaults to blinear.
-        downsample_mode (str, optional): "nearest", "bilinear", "bicubic". If None, pixels are just dicarded. Defaults to blinear.
+        downsample_mode (str, optional): "nearest", "bilinear", "bicubic". 
+        If None, pixels are just dicarded. Defaults to blinear.
     Raises:
         ValueError: Unsupported band name
 

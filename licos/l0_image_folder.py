@@ -37,9 +37,12 @@ class L0ImageFolder(Dataset):
             root (string): root directory of the dataset
             seed (int): split seed.
             test_train_split (float): split percentage (e.g., 0.8 means 80% train and 20% test).
-            l0_format (string): use "raw" to load bands separately, "merged" to load all the bands in one, "merged_with_res", to merge bands with the same resolution.
-            target_resolution_merged_m (float, optional): target resolution in m when merged format is used. Defaults to 20.0.
-            transform (callable, optional): a function or transform that takes in tensor and returns a transformed version.
+            l0_format (string): use "raw" to load bands separately, "merged" to load all the bands in one,
+            "merged_with_res", to merge bands with the same resolution.
+            target_resolution_merged_m (float, optional): target resolution in m when merged format is used.
+            Defaults to 20.0.
+            transform (callable, optional): a function or transform that takes in tensor and returns a
+            transformed version.
             preloaded (bool, optional): if True, images are preloaded. Defaults to True.
             split (str, optional): split mode ('train' or 'test'). Defaults to "train".
 

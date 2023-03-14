@@ -1,6 +1,5 @@
 import torch
 import random
-import torch
 import time
 
 import torch.optim as optim
@@ -12,7 +11,7 @@ from compressai.zoo import image_models
 from compressai.datasets import ImageFolder
 from compressai.losses import RateDistortionLoss
 
-from .utils import AverageMeter, CustomDataParallel, configure_optimizers
+from .utils import AverageMeter, configure_optimizers
 from .l0_image_folder import L0ImageFolder
 from .model_utils import get_model
 
@@ -353,7 +352,7 @@ def eval_test_set(
     """
     # print(f"Rank {rank} - Evaluating test set")
     # print(f"Rank {rank} - Previous learning rate: {optimizer.param_groups[0]['lr']}")
-    start = time.time()
+    # start = time.time()
     loss = test_epoch(rank, batch_idx, test_dataloader, net, criterion)
     test_losses.append(loss.item())
     local_time_at_test.append(paseos_instance._state.time)

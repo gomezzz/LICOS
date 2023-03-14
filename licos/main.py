@@ -46,7 +46,10 @@ def main(cfg):
     plot = False
     test_losses = []
     local_time_at_test = []
-    constraint_function = lambda: constraint_func(paseos_instance, groundstations)
+
+    def constraint_function():
+        return constraint_func(paseos_instance, groundstations)
+
     paseos.set_log_level("INFO")
     device = "cuda:" + str(rank) if cfg.cuda and torch.cuda.is_available() else "cpu"
     cfg.pretrained = False
@@ -210,7 +213,7 @@ def main(cfg):
             )
             time_since_last_update += time_per_batch
             # 2) Train model on one batch
-            start = time.time()
+            # start = time.time()
             train_dataloader_iter = train_one_batch(
                 rank,
                 net,

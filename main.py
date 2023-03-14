@@ -30,6 +30,9 @@ def main(cfg):
     standby_period = 900  # how long to standby if necessary
     MPI_sync_period = 600  # After how many seconds we wait synchronize instance clocks
 
+    # Set run name
+    cfg.save_name = cfg.model + "qual=" + str(cfg.model_quality) + "_l0=" + cfg.l0_format + "_seed=" + str(cfg.seed)
+
     plot = False
     test_losses = []
     local_time_at_test = []
@@ -50,9 +53,9 @@ def main(cfg):
         print("Removing old lock...")
         os.remove(".mpi_lock")
 
-    if rank == 0 and os.path.exists("central_model.pth.tar"):
+    if rank == 0 and os.path.exists(cfg.save_name+".pth.tar"):
         print("Removing old model...")
-        os.remove("central_model.pth.tar")
+        os.remove(cfg.save_name+".pth.tar")
 
     # Init training
     (
@@ -167,6 +170,7 @@ def main(cfg):
                 loss,
                 best_loss,
                 paseos_instance._state.time,
+                cfg
             )
             time_since_last_update = 0
 

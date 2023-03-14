@@ -13,6 +13,7 @@ def update_central_model(
     loss,
     best_loss,
     local_time,
+    cfg
 ):
     """Updates the model on the ground
 
@@ -24,7 +25,10 @@ def update_central_model(
         loss (float): current loss value
         best_loss (float): best achieved loss value
         local_time (float): local time of the rank in seconds
+        cfg (DotMap): cfg of the run
     """
+    
+
     # Check for lock file (semaphore)
     print(f"Rank {rank} waiting for model update.")
     while os.path.exists(".mpi_lock"):
@@ -38,9 +42,9 @@ def update_central_model(
     local_sd = net.state_dict()
 
     # Check there is already a central model, otherwise start one
-    if os.path.exists("central_model.pth.tar"):
+    if os.path.exists(cfg.save_name+".pth.tar"):
         # Load the current central model
-        central_model = torch.load("central_model.pth.tar", map_location=device)
+        central_model = torch.load(cfg.save_name+".pth.tar", map_location=device)
         central_model_sd = central_model["state_dict"]
 
         # TODO in the future consider which model is newer etc.
@@ -66,7 +70,7 @@ def update_central_model(
             "local_time": local_time,
         },
         False,
-        filename="central_model.pth.tar",
+        filename=cfg.save_name+".pth.tar",
     )
 
     # Release lock

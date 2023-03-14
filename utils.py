@@ -52,7 +52,6 @@ def save_checkpoint(state, is_best, filename="checkpoint.pth.tar"):
     if is_best:
         shutil.copyfile(filename, "checkpoint_best_loss.pth.tar")
 
-
 def check_cfg(config):
     """
     Checks the validity of the config entries.
@@ -113,3 +112,13 @@ def check_cfg(config):
     if config.get("checkpoint"):
         assert os.path.exists(config["checkpoint"]), f"Checkpoint {config['checkpoint']} does not exist"
         assert os.path.splitext(config["checkpoint"])[1] in [".pt", ".pth"], f"Checkpoint {config['checkpoint']} has an invalid extension"
+
+    # Check model quality values
+    assert config.model_quality > 0 and  config.model_quality < 9
+
+    # Check l0 values
+    assert config.l0_format in ["raw","merged"]
+    assert isinstance(config.use_l0_data, bool)
+    assert isinstance(config.l0_target_resolution_merged_m, float)
+    assert isinstance(config.l0_train_test_split, float)
+    assert config.l0_train_test_split >= 0 and  config.l0_train_test_split <= 1.0

@@ -12,7 +12,11 @@ from compressai.zoo import image_models
 from compressai.datasets import ImageFolder
 from compressai.losses import RateDistortionLoss
 
-from utils import AverageMeter, configure_optimizers
+from utils import AverageMeter, CustomDataParallel, configure_optimizers
+from l0_image_folder import L0ImageFolder
+
+from model_utils import get_model
+from l0_utils import get_model
 
 
 def init_training(cfg, rank):
@@ -38,8 +42,34 @@ def init_training(cfg, rank):
         [transforms.CenterCrop(cfg.patch_size), transforms.ToTensor()]
     )
 
-    train_dataset = ImageFolder(cfg.dataset, split="train", transform=train_transforms)
-    test_dataset = ImageFolder(cfg.dataset, split="test", transform=test_transforms)
+    if cfg.use_l0_data:
+        train_dataset = L0ImageFolder(
+            root=cfg.dataset,
+            seed=cfg.seed,
+            test_train_split=cfg.train_split_percentage,
+            l0_format=cfg.l0_format,
+            target_resolution_merged_m=cfg.target_resolution_merged_m,
+            preloaded=cfg.preloaded,
+            split="train",
+            transform=train_transforms,
+        )
+        test_dataset = L0ImageFolder(
+            root=cfg.dataset,
+            seed=cfg.seed,
+            test_train_split=cfg.train_split_percentage,
+            l0_format=cfg.l0_format,
+            target_resolution_merged_m=cfg.target_resolution_merged_m,
+            preloaded=cfg.preloaded,
+            split="test",
+            transform=test_transforms,
+        )
+    else:
+        train_dataset = ImageFolder(
+            cfg.dataset, split="train", transform=train_transforms
+        )
+        test_dataset = ImageFolder(
+            cfg.dataset, split="test", transform=test_transforms
+        )
 
     device = "cuda:" + str(rank) if cfg.cuda and torch.cuda.is_available() else "cpu"
 
@@ -62,8 +92,23 @@ def init_training(cfg, rank):
         pin_memory=(device == "cuda:" + str(rank)),
         pin_memory_device=device,
     )
+    if cfg.use_l0_data:
+        if cfg.l0_format == "raw":
+            net = get_model(cfg.model, cfg.pretrained, 1)
+            print(net)
+        else:
+            net = get_model(cfg.model, cfg.pretrained, 13)
+    else:
+        net = image_models[cfg.model](quality=1, pretrained=cfg.pretrained)
 
-    net = image_models[cfg.model](quality=1, pretrained=cfg.pretrained)
+    if cfg.use_l0_data:
+        if cfg.l0_format == "raw":
+            net = get_model(cfg.model, pretrained=cfg.pretrained, in_channels=1)
+        else:
+            net = get_model(cfg.model, pretrained=cfg.pretrained, in_channels=13)
+    else:
+        net = image_models[cfg.model](quality=1, pretrained=cfg.pretrained)
+
     net = net.to(device)
 
     # if cfg.cuda and torch.cuda.device_count() > 1:

@@ -25,11 +25,12 @@ def get_known_actor_comms_status(values):
     return vals
 
 
-def create_plots(paseos_instances, rank, figsize=(8, 2), dpi=150):
+def create_plots(paseos_instances, cfg, rank, figsize=(8, 2), dpi=150):
     """Creates plots from the instance
 
     Args:
         paseos_instances (PASEOS): instances to plot
+        cfg (DotMap): cfg file of the run
         rank (int): Index of MPI rank.
         figsize (tuple): Size of plots.
         dpi (int): dpi of the plots.
@@ -85,7 +86,9 @@ def create_plots(paseos_instances, rank, figsize=(8, 2), dpi=150):
             plt.ylabel(item.replace("_", " "))
             if item == "known_actors":
                 plt.yticks([0, 1, 2, 3], ["None", "Svalbard", "Matera", "Maspalomas"])
-            plt.savefig("results/" + item + "_rank" + str(rank) + ".png", dpi=dpi)
+            plt.savefig(
+                cfg.save_path + "/" + item + "_rank" + str(rank) + ".png", dpi=dpi
+            )
         # Add a legend showing which satellite is which
         # plt.legend(
         #         names,

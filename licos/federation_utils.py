@@ -3,7 +3,7 @@ import time
 import os
 import torch
 
-from utils import save_checkpoint
+from .utils import save_checkpoint
 
 
 def update_central_model(
@@ -35,9 +35,9 @@ def update_central_model(
     local_sd = net.state_dict()
 
     # Check there is already a central model, otherwise start one
-    if os.path.exists(cfg.save_name + ".pth.tar"):
+    if os.path.exists(cfg.save_path + ".pth.tar"):
         # Load the current central model
-        central_model = torch.load(cfg.save_name + ".pth.tar", map_location=device)
+        central_model = torch.load(cfg.save_path + ".pth.tar", map_location=device)
         central_model_sd = central_model["state_dict"]
 
         # TODO in the future consider which model is newer etc.
@@ -63,7 +63,7 @@ def update_central_model(
             "local_time": local_time,
         },
         False,
-        filename=cfg.save_name + ".pth.tar",
+        filename=cfg.save_path + ".pth.tar",
     )
 
     # Release lock

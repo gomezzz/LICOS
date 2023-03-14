@@ -2,6 +2,7 @@ import sys
 import time
 import os
 import warnings
+from pathlib import Path
 
 import toml
 from dotmap import DotMap
@@ -11,11 +12,11 @@ import pykep as pk
 import paseos
 from mpi4py import MPI
 
-from create_plots import create_plots
-from init_paseos import init_paseos
-from actor_logic import constraint_func, decide_on_activity, perform_activity
-from federation_utils import update_central_model
-from train import train_one_batch, init_training, eval_test_set
+from .create_plots import create_plots
+from .init_paseos import init_paseos
+from .actor_logic import constraint_func, decide_on_activity, perform_activity
+from .federation_utils import update_central_model
+from .train import train_one_batch, init_training, eval_test_set
 
 
 def main(cfg):
@@ -31,8 +32,8 @@ def main(cfg):
     MPI_sync_period = 600  # After how many seconds we wait synchronize instance clocks
 
     # Set run name
-    cfg.save_name = (
-        "../"
+    cfg.save_path = (
+        "results/"
         + cfg.model
         + "qual="
         + str(cfg.model_quality)
@@ -62,9 +63,9 @@ def main(cfg):
         print("Removing old lock...")
         os.remove(".mpi_lock")
 
-    if rank == 0 and os.path.exists(cfg.save_name + ".pth.tar"):
+    if rank == 0 and os.path.exists(cfg.save_path + ".pth.tar"):
         print("Removing old model...")
-        os.remove(cfg.save_name + ".pth.tar")
+        os.remove(cfg.save_path + ".pth.tar")
 
     # Init training
     (
@@ -249,13 +250,16 @@ def main(cfg):
             paseos_instance._state.time - paseos_instance._cfg.sim.start_time
         )
 
-    paseos_instance.save_status_log_csv("results/" + str(rank) + ".csv")
-    create_plots(paseos_instances=[paseos_instance], rank=rank)
+    Path(cfg.save_path + "/").mkdir(parents=True, exist_ok=True)
+    paseos_instance.save_status_log_csv(cfg.save_path + "/" + str(rank) + ".csv")
+    create_plots(paseos_instances=[paseos_instance], cfg=cfg, rank=rank)
     np.savetxt(
-        "results/loss_rank" + str(rank) + ".csv", np.array(test_losses), delimiter=","
+        cfg.save_path + "/loss_rank" + str(rank) + ".csv",
+        np.array(test_losses),
+        delimiter=",",
     )
     np.savetxt(
-        "results/time_at_loss_rank" + str(rank) + ".csv",
+        cfg.save_path + "/time_at_loss_rank" + str(rank) + ".csv",
         np.array(local_time_at_test),
         delimiter=",",
     )
@@ -265,7 +269,7 @@ def main(cfg):
 if __name__ == "__main__":
     if len(sys.argv) < 2:
         warnings.warn("Please pass the path to a cfg file. Using default cfg")
-        path = "cfg/default_cfg.toml"
+        path = "../cfg/default_cfg.toml"
     else:
         path = sys.argv[1]
     if not os.path.exists(path):

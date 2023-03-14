@@ -1,7 +1,6 @@
 import shutil
 
 import os
-import toml
 
 import torch
 import torch.nn as nn

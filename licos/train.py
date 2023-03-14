@@ -12,10 +12,9 @@ from compressai.zoo import image_models
 from compressai.datasets import ImageFolder
 from compressai.losses import RateDistortionLoss
 
-from utils import AverageMeter, CustomDataParallel, configure_optimizers
-from l0_image_folder import L0ImageFolder
-
-from model_utils import get_model
+from .utils import AverageMeter, CustomDataParallel, configure_optimizers
+from .l0_image_folder import L0ImageFolder
+from .model_utils import get_model
 
 
 def init_training(cfg, rank):

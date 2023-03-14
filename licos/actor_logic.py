@@ -1,6 +1,7 @@
 import paseos
 import pykep as pk
 
+
 def decide_on_activity(
     paseos_instance: paseos.PASEOS,
     timestep,
@@ -80,6 +81,7 @@ def constraint_func(paseos_instance: paseos.PASEOS, actors_to_track):
         return False
 
     return True
+
 
 def perform_activity(
     activity, power_consumption, paseos_instance, time_to_run, constraint_function

@@ -13,7 +13,7 @@ from mpi4py import MPI
 
 from create_plots import create_plots
 from init_paseos import init_paseos
-from actor_logic import constraint_func,decide_on_activity,perform_activity
+from actor_logic import constraint_func, decide_on_activity, perform_activity
 from federation_utils import update_central_model
 from train import train_one_batch, init_training, eval_test_set
 
@@ -31,7 +31,16 @@ def main(cfg):
     MPI_sync_period = 600  # After how many seconds we wait synchronize instance clocks
 
     # Set run name
-    cfg.save_name = cfg.model + "qual=" + str(cfg.model_quality) + "_l0=" + cfg.l0_format + "_seed=" + str(cfg.seed)
+    cfg.save_name = (
+        "../"
+        + cfg.model
+        + "qual="
+        + str(cfg.model_quality)
+        + "_l0="
+        + cfg.l0_format
+        + "_seed="
+        + str(cfg.seed)
+    )
 
     plot = False
     test_losses = []
@@ -53,9 +62,9 @@ def main(cfg):
         print("Removing old lock...")
         os.remove(".mpi_lock")
 
-    if rank == 0 and os.path.exists(cfg.save_name+".pth.tar"):
+    if rank == 0 and os.path.exists(cfg.save_name + ".pth.tar"):
         print("Removing old model...")
-        os.remove(cfg.save_name+".pth.tar")
+        os.remove(cfg.save_name + ".pth.tar")
 
     # Init training
     (
@@ -124,7 +133,6 @@ def main(cfg):
             time_since_last_update,
         )
 
-
         ################################################################################
         # Perform  what was the decided on first in paseos and than on the rank, either
         # A) Exchange model with ground
@@ -170,7 +178,7 @@ def main(cfg):
                 loss,
                 best_loss,
                 paseos_instance._state.time,
-                cfg
+                cfg,
             )
             time_since_last_update = 0
 
@@ -255,7 +263,7 @@ def main(cfg):
 
 
 if __name__ == "__main__":
-    if len(sys.argv) < 2: 
+    if len(sys.argv) < 2:
         warnings.warn("Please pass the path to a cfg file. Using default cfg")
         path = "cfg/default_cfg.toml"
     else:

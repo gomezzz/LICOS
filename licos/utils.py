@@ -1,6 +1,6 @@
 import shutil
 
-import os 
+import os
 import toml
 
 import torch
@@ -52,6 +52,7 @@ def save_checkpoint(state, is_best, filename="checkpoint.pth.tar"):
     if is_best:
         shutil.copyfile(filename, "checkpoint_best_loss.pth.tar")
 
+
 def check_cfg(config):
     """
     Checks the validity of the config entries.
@@ -93,7 +94,9 @@ def check_cfg(config):
     assert config["aux_learning_rate"] > 0, "Aux learning rate must be positive"
 
     # Check if the patch size has two elements and they are both positive
-    assert len(config["patch_size"]) == 2 and all(x > 0 for x in config["patch_size"]), "Patch size must have two positive elements"
+    assert len(config["patch_size"]) == 2 and all(
+        x > 0 for x in config["patch_size"]
+    ), "Patch size must have two positive elements"
 
     # Check if cuda is a boolean value
     assert isinstance(config["cuda"], bool), "Cuda must be a boolean value"
@@ -107,18 +110,23 @@ def check_cfg(config):
     # If seed is specified, check if it is an integer value
     if config.get("seed"):
         assert isinstance(config["seed"], int), "Seed must be an integer value"
-        
+
     # If checkpoint is specified, check if it exists and it has a valid extension (.pt or .pth)
     if config.get("checkpoint"):
-        assert os.path.exists(config["checkpoint"]), f"Checkpoint {config['checkpoint']} does not exist"
-        assert os.path.splitext(config["checkpoint"])[1] in [".pt", ".pth"], f"Checkpoint {config['checkpoint']} has an invalid extension"
+        assert os.path.exists(
+            config["checkpoint"]
+        ), f"Checkpoint {config['checkpoint']} does not exist"
+        assert os.path.splitext(config["checkpoint"])[1] in [
+            ".pt",
+            ".pth",
+        ], f"Checkpoint {config['checkpoint']} has an invalid extension"
 
     # Check model quality values
-    assert config.model_quality > 0 and  config.model_quality < 9
+    assert config.model_quality > 0 and config.model_quality < 9
 
     # Check l0 values
-    assert config.l0_format in ["raw","merged"]
+    assert config.l0_format in ["raw", "merged"]
     assert isinstance(config.use_l0_data, bool)
     assert isinstance(config.l0_target_resolution_merged_m, float)
     assert isinstance(config.l0_train_test_split, float)
-    assert config.l0_train_test_split >= 0 and  config.l0_train_test_split <= 1.0
+    assert config.l0_train_test_split >= 0 and config.l0_train_test_split <= 1.0

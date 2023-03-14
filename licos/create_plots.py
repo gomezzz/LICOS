@@ -12,7 +12,6 @@ def get_known_actor_comms_status(values):
         list of int: Indices of known actors.
     """
 
-
     vals = []
     for item in values:
         if "Svalbard" in item:
@@ -26,7 +25,7 @@ def get_known_actor_comms_status(values):
     return vals
 
 
-def create_plots(paseos_instances, rank, figsize=(8,2),dpi=150):
+def create_plots(paseos_instances, rank, figsize=(8, 2), dpi=150):
     """Creates plots from the instance
 
     Args:

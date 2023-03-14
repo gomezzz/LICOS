@@ -66,9 +66,7 @@ def init_training(cfg, rank):
         train_dataset = ImageFolder(
             cfg.dataset, split="train", transform=train_transforms
         )
-        test_dataset = ImageFolder(
-            cfg.dataset, split="test", transform=test_transforms
-        )
+        test_dataset = ImageFolder(cfg.dataset, split="test", transform=test_transforms)
 
     device = "cuda:" + str(rank) if cfg.cuda and torch.cuda.is_available() else "cpu"
 
@@ -93,20 +91,44 @@ def init_training(cfg, rank):
     )
     if cfg.use_l0_data:
         if cfg.l0_format == "raw":
-            net = get_model(model=cfg.model,  pretrained=cfg.pretrained, in_channels=1, quality=cfg.model_quality)
+            net = get_model(
+                model=cfg.model,
+                pretrained=cfg.pretrained,
+                in_channels=1,
+                quality=cfg.model_quality,
+            )
             print(net)
         else:
-            net = get_model(model=cfg.model,  pretrained=cfg.pretrained, in_channels=13, quality=cfg.model_quality)
+            net = get_model(
+                model=cfg.model,
+                pretrained=cfg.pretrained,
+                in_channels=13,
+                quality=cfg.model_quality,
+            )
     else:
-        net = image_models[cfg.model](quality=cfg.model_quality, pretrained=cfg.pretrained)
+        net = image_models[cfg.model](
+            quality=cfg.model_quality, pretrained=cfg.pretrained
+        )
 
     if cfg.use_l0_data:
         if cfg.l0_format == "raw":
-            net = get_model(model=cfg.model, pretrained=cfg.pretrained, in_channels=1, quality=cfg.model_quality)
+            net = get_model(
+                model=cfg.model,
+                pretrained=cfg.pretrained,
+                in_channels=1,
+                quality=cfg.model_quality,
+            )
         else:
-            net = get_model(model=cfg.model, pretrained=cfg.pretrained, in_channels=13, quality=cfg.model_quality)
+            net = get_model(
+                model=cfg.model,
+                pretrained=cfg.pretrained,
+                in_channels=13,
+                quality=cfg.model_quality,
+            )
     else:
-        net = image_models[cfg.model](quality=cfg.model_quality, pretrained=cfg.pretrained)
+        net = image_models[cfg.model](
+            quality=cfg.model_quality, pretrained=cfg.pretrained
+        )
 
     net = net.to(device)
 
@@ -297,6 +319,7 @@ def test_epoch(rank, epoch, test_dataloader, model, criterion):
     )
 
     return loss.avg
+
 
 def eval_test_set(
     rank,

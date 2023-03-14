@@ -47,6 +47,8 @@ jobs:
         shell: bash -l {0}
         run: |
           micromamba activate licos
+          git clone https://github.com/aidotse/PASEOS.git
+          mv PASEOS/paseos paseos
           micromamba install pytest pytest-cov pytest-asyncio
           pytest --junitxml=pytest.xml --cov-report=term-missing:skip-covered --cov=licos licos/tests/ | tee pytest-coverage.txt
       - name: Pytest coverage comment

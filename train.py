@@ -94,20 +94,20 @@ def init_training(cfg, rank):
     )
     if cfg.use_l0_data:
         if cfg.l0_format == "raw":
-            net = get_model(cfg.model, cfg.pretrained, 1)
+            net = get_model(model=cfg.model,  pretrained=cfg.pretrained, in_channels=1, quality=cfg.model_quality)
             print(net)
         else:
-            net = get_model(cfg.model, cfg.pretrained, 13)
+            net = get_model(model=cfg.model,  pretrained=cfg.pretrained, in_channels=13, quality=cfg.model_quality)
     else:
-        net = image_models[cfg.model](quality=1, pretrained=cfg.pretrained)
+        net = image_models[cfg.model](quality=cfg.model_quality, pretrained=cfg.pretrained)
 
     if cfg.use_l0_data:
         if cfg.l0_format == "raw":
-            net = get_model(cfg.model, pretrained=cfg.pretrained, in_channels=1)
+            net = get_model(model=cfg.model, pretrained=cfg.pretrained, in_channels=1, quality=cfg.model_quality)
         else:
-            net = get_model(cfg.model, pretrained=cfg.pretrained, in_channels=13)
+            net = get_model(model=cfg.model, pretrained=cfg.pretrained, in_channels=13, quality=cfg.model_quality)
     else:
-        net = image_models[cfg.model](quality=1, pretrained=cfg.pretrained)
+        net = image_models[cfg.model](quality=cfg.model_quality, pretrained=cfg.pretrained)
 
     net = net.to(device)
 

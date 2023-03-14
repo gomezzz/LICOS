@@ -55,7 +55,6 @@ def create_plots(paseos_instances, cfg, rank, figsize=(8, 2), dpi=150):
 
         # Get dat afrom all satellites and plot it
         for instance in paseos_instances:
-
             # Get time of each data point
             timesteps = instance.monitor["timesteps"]
 

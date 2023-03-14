@@ -101,7 +101,6 @@ def main(cfg):
     best_loss = float("inf")
     batch_idx = 0
     while total_simulation_time < cfg.simulation_time:
-
         ################################################################################
         # Sync time between ranks to minimize divergence
         if (

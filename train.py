@@ -14,6 +14,8 @@ from compressai.losses import RateDistortionLoss
 
 from utils import AverageMeter, CustomDataParallel, configure_optimizers
 from l0_image_folder import L0ImageFolder
+
+from model_utils import get_model
 from l0_utils import get_model
 
 
@@ -96,6 +98,14 @@ def init_training(args, rank):
             print(net)
         else:
             net = get_model(args.model, args.pretrained, 13)
+    else:
+        net = image_models[args.model](quality=1, pretrained=args.pretrained)
+
+    if args.use_l0_data:
+        if args.l0_format == "raw":
+            net = get_model(args.model, pretrained=args.pretrained, in_channels=1)
+        else:
+            net = get_model(args.model, pretrained=args.pretrained, in_channels=13)
     else:
         net = image_models[args.model](quality=1, pretrained=args.pretrained)
 

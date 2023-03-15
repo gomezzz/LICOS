@@ -92,8 +92,8 @@ def parse_args(argv):
         help="Dataloaders threads (default: %(default)s)",
     )
     parser.add_argument(
-        "--lambda",
-        dest="lambda",
+        "--lmbda",
+        dest="lmbda",
         type=float,
         default=1e-2,
         help="Bit-rate distortion parameter (default: %(default)s)",

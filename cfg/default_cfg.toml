@@ -2,7 +2,7 @@
 model = "bmshj2018-factorized"
 
 # Training dataset
-dataset = "data/aid"
+dataset = "licos/tests/test_data"
 
 # Simulation runtime in seconds
 simulation_time = 100.0

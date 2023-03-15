@@ -10,9 +10,9 @@ from compressai.zoo import image_models
 from compressai.datasets import ImageFolder
 from compressai.losses import RateDistortionLoss
 
-from .utils import AverageMeter, configure_optimizers
-from .l0_image_folder import L0ImageFolder
-from .model_utils import get_model
+from utils import AverageMeter, configure_optimizers
+from l0_image_folder import L0ImageFolder
+from model_utils import get_model
 
 
 def init_training(cfg, rank):
@@ -42,20 +42,20 @@ def init_training(cfg, rank):
         train_dataset = L0ImageFolder(
             root=cfg.dataset,
             seed=cfg.seed,
-            test_train_split=cfg.train_split_percentage,
+            test_train_split=cfg.l0_train_test_split,
             l0_format=cfg.l0_format,
-            target_resolution_merged_m=cfg.target_resolution_merged_m,
-            preloaded=cfg.preloaded,
+            target_resolution_merged_m=cfg.l0_target_resolution_merged_m,
+            preloaded=True,
             split="train",
             transform=train_transforms,
         )
         test_dataset = L0ImageFolder(
             root=cfg.dataset,
             seed=cfg.seed,
-            test_train_split=cfg.train_split_percentage,
+            test_train_split=cfg.l0_train_test_split,
             l0_format=cfg.l0_format,
-            target_resolution_merged_m=cfg.target_resolution_merged_m,
-            preloaded=cfg.preloaded,
+            target_resolution_merged_m=cfg.l0_target_resolution_merged_m,
+            preloaded=True,
             split="test",
             transform=test_transforms,
         )
@@ -94,7 +94,6 @@ def init_training(cfg, rank):
                 in_channels=1,
                 quality=cfg.model_quality,
             )
-            print(net)
         else:
             net = get_model(
                 model=cfg.model,

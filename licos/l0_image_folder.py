@@ -9,7 +9,7 @@ from torchvision import transforms
 import torch
 from sklearn.model_selection import train_test_split
 
-from .l0_utils import BAND_LIST, DN_MAX, image_band_reshape, IMAGE_SHAPE_DICT
+from l0_utils import BAND_LIST, DN_MAX, image_band_reshape, IMAGE_SHAPE_DICT
 
 
 @register_dataset("L0ImageFolder")

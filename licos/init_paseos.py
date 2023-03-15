@@ -2,7 +2,7 @@ import pykep as pk
 import paseos
 from paseos import ActorBuilder, SpacecraftActor, GroundstationActor
 
-from .get_constellation import get_constellation
+from get_constellation import get_constellation
 
 
 def init_paseos(rank, N_ranks):

@@ -1,0 +1,64 @@
+# Model architecture
+model = "bmshj2018-factorized"
+
+# Training dataset
+dataset = "my_tif_dir"
+
+# Simulation runtime in seconds
+simulation_time = 10000.0
+
+# Learning rate
+learning_rate = 1e-4
+
+# Dataloaders threads
+num_workers = 1
+
+# Bit-rate distortion parameter
+lmbda = 1e-2
+
+# Batch size
+batch_size = 16
+
+# Test batch size
+test_batch_size = 64
+
+# Auxiliary loss learning rate
+aux_learning_rate = 1e-3
+
+# Size of the patches to be cropped
+patch_size = [256, 256]
+
+# Use cuda
+cuda = true
+
+# Save model to disk
+save = true
+
+# Set random seed for reproducibility
+seed = 42
+
+# Gradient clipping max norm
+clip_max_norm = 1.0
+
+# Path to a checkpoint
+checkpoint = ""
+
+# Whether to use a pretrained model
+pretrained = true
+
+# Quality value for the model, 1 to 8
+model_quality = 1
+
+# Whether to use l0 data
+use_l0_data = true
+
+# L0 data formatting 
+# raw - as 13 individual bands
+# merged - 13 channel img
+l0_format = "raw"
+
+# For l0 data, image target resolution for merged mode.
+l0_target_resolution_merged_m = 20.0
+
+# Percentage of train partition. Used only for l0 data.",
+l0_train_test_split = 0.8

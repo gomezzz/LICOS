@@ -3,7 +3,7 @@ import time
 import os
 import torch
 
-from .utils import save_checkpoint
+from utils import save_checkpoint
 
 
 def update_central_model(

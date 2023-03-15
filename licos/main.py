@@ -8,14 +8,16 @@ from dotmap import DotMap
 import torch
 import numpy as np
 import pykep as pk
+
+sys.path.append("../")  # needed until paseos is properly installed
 import paseos
 from mpi4py import MPI
 
-from .create_plots import create_plots
-from .init_paseos import init_paseos
-from .actor_logic import constraint_func, decide_on_activity, perform_activity
-from .federation_utils import update_central_model
-from .train import train_one_batch, init_training, eval_test_set
+from create_plots import create_plots
+from init_paseos import init_paseos
+from actor_logic import constraint_func, decide_on_activity, perform_activity
+from federation_utils import update_central_model
+from train import train_one_batch, init_training, eval_test_set
 
 
 def main(cfg):

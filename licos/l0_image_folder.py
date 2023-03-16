@@ -95,7 +95,11 @@ class L0ImageFolder(Dataset):
             if preloaded:
                 files = []
                 for sample in self.samples:
-                    files.append(self._open_band_(sample))
+                    try:
+                        files.append(self._open_band_(sample))
+                    except Exception as e:
+                        print(f"There was an error loading {sample}")
+                        print(str(e))
 
                 # Samples are preloaded
                 self.samples = files

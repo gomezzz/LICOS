@@ -18,6 +18,7 @@ from init_paseos import init_paseos
 from actor_logic import constraint_func, decide_on_activity, perform_activity
 from federation_utils import update_central_model
 from train import train_one_batch, init_training, eval_test_set
+from utils import get_savepath_str
 
 
 def main(cfg):
@@ -32,17 +33,7 @@ def main(cfg):
     standby_period = 900  # how long to standby if necessary
     MPI_sync_period = 600  # After how many seconds we wait synchronize instance clocks
 
-    # Set run name
-    cfg.save_path = (
-        "results/"
-        + cfg.model
-        + "qual="
-        + str(cfg.model_quality)
-        + "_l0="
-        + cfg.l0_format
-        + "_seed="
-        + str(cfg.seed)
-    )
+    cfg.save_path = get_savepath_str(cfg)
 
     plot = False
     test_losses = []
@@ -266,6 +257,7 @@ def main(cfg):
         np.array(local_time_at_test),
         delimiter=",",
     )
+    toml.dump(cfg,open(cfg.save_path + "/cfg.toml","w"))
     print(f"Rank {rank} finished.")
 
 

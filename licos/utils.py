@@ -2,11 +2,34 @@ import shutil
 
 import os
 
+from dotmap import DotMap
+
 import torch
 import torch.nn as nn
 
 from compressai.optimizers import net_aux_optimizer
 from compressai.zoo import image_models
+
+
+def get_savepath_str(cfg: DotMap) -> str:
+    """Determines sets and returns the path this run is saved under.
+
+    Args:
+        cfg (DotMap): config of the run
+
+    Returns:
+        str: path
+    """
+    return (
+        "results/"
+        + cfg.model
+        + "qual="
+        + str(cfg.model_quality)
+        + "_l0="
+        + cfg.l0_format
+        + "_seed="
+        + str(cfg.seed)
+    )
 
 
 class AverageMeter:

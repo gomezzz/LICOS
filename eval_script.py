@@ -21,7 +21,7 @@ from licos.l0_utils import DN_MAX
 from licos.utils import get_savepath_str
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
-dataset = "/home/pablo/kalypso/raw_test/"
+dataset = "/home/pablo/raw_test/"
 
 cfg = DotMap(toml.load("cfg/l0.toml"), _dynamic=False)
 seed = 42
@@ -231,3 +231,26 @@ for img in tqdm(test_data_raw):
     psnr_ssim_matched.append(psnr_val)
     ssim_ssim_matched.append(mssim_val)
     bpp_ssim_matched.append(bpp_jpeg)
+
+
+print("Type \t PSNR \t MSSSIM \t BPP")
+print("RAW", np.mean(psnr_raw), np.mean(ssim_raw), np.mean(bpp_raw))
+print("MERGED", np.mean(psnr_merged), np.mean(ssim_merged), np.mean(bpp_merged))
+print(
+    "JPEG BPP",
+    np.mean(psnr_bbp_matched),
+    np.mean(ssim_bbp_matched),
+    np.mean(bpp_bbp_matched),
+)
+print(
+    "JPEG PSNR",
+    np.mean(psnr_psnr_matched),
+    np.mean(ssim_psnr_matched),
+    np.mean(bpp_psnr_matched),
+)
+print(
+    "JPEG MSSIM",
+    np.mean(psnr_ssim_matched),
+    np.mean(ssim_ssim_matched),
+    np.mean(bpp_ssim_matched),
+)

@@ -7,9 +7,14 @@ from compressai.registry import register_dataset
 import random
 from glob import glob
 from torchvision import transforms
-from l0_utils import BAND_LIST, DN_MAX, image_band_reshape, IMAGE_SHAPE_DICT
+from l0_utils import (
+    BAND_LIST,
+    DN_MAX,
+    geographical_splitter,
+    image_band_reshape,
+    IMAGE_SHAPE_DICT,
+)
 import torch
-from sklearn.model_selection import train_test_split
 
 
 @register_dataset("L0ImageFolder")
@@ -54,11 +59,11 @@ class L0ImageFolder(Dataset):
             raise RuntimeError(f'Invalid directory "{root}"')
 
         # Splitting according to seed
-        train_samples, test_samples, _, _ = train_test_split(
+        train_samples, test_samples = geographical_splitter(
             l0_files,
-            l0_files,  # Added since labels are needed but not used.
-            test_size=(1 - test_train_split),
-            random_state=seed,
+            test_size_percentage=(1 - test_train_split),
+            seed=seed,
+            split_percentage_error_tolerance=0.01,
         )
 
         if split == "train":

@@ -1,6 +1,127 @@
 from torch.nn.functional import interpolate
 import torch
 
+from copy import deepcopy
+import random
+import numpy as np
+import os
+
+
+def geographical_splitter(
+    filenames, test_size_percentage, seed=42, split_percentage_error_tolerance=0.01
+):
+    """Splits the events according to a geographical position. In this way, patches related to a specific area can be only in train or in test.
+
+    Args:
+        filenames (list): file names of the different images.
+        test_size_percentage (float): split perecentage.
+        seed (int, optional): seed for reproducibility. Defaults to 42.
+        split_percentage_error_tolerance (float, optional): tolerance on the split percentage error. Defaults to 0.01.
+
+    Returns:
+        list: train filenames
+        list: test filenames
+    """
+    # locations - n_files dictionary
+    location_files_dictionary = {
+        "Fuego": 16,
+        "Sangay": 35,
+        "Piton_de_la_Fournaise": 31,
+        "Chillan_Nevados_de": 6,
+        "Barren_Island": 20,
+        "Nyamulagira": 18,
+        "Copahue": 6,
+        "Krysuvik-Trolladyngja": 24,
+        "Santa_Maria": 3,
+        "San_Miguel": 14,
+        "Mayon": 6,
+        "Stromboli": 10,
+        "Raung": 15,
+        "Etna": 14,
+        "La_Palma": 10,
+        "Karangetang": 6,
+        "Telica": 6,
+        "Tinakula": 9,
+        "Bolivia": 9,
+        "Sweden": 5,
+        "Kenya": 6,
+        "Greece": 31,
+        "Mexico": 6,
+        "Greenland": 7,
+        "Ukraine": 6,
+        "Italy": 7,
+        "Latvia": 16,
+        "Australia": 3,
+        "Spain": 8,
+        "France": 5,
+    }
+
+    # Copying locations to perform shuffle
+    location_files_dictionary_shuffled = deepcopy(
+        list(location_files_dictionary.keys())
+    )
+
+    # Fixing seed to ensure that dataset train and test will be splitted in the same way into different iterations
+    random.seed(seed)
+    # Shuffling locations
+    random.shuffle(location_files_dictionary_shuffled)
+
+    # Number of total files
+    n_files = np.sum(np.array([n for n in location_files_dictionary.values()]))
+
+    # Maximum number of events in tests
+    n_files_test_max = int(test_size_percentage * n_files)
+
+    # Number of files in tests
+    n_files_test = 0
+
+    # Currernt index
+    idx = 0
+
+    # List of files location in test
+    files_locations_tests_list = []
+
+    while n_files_test < n_files_test_max:
+        n_files_test += location_files_dictionary[
+            location_files_dictionary_shuffled[idx]
+        ]
+        files_locations_tests_list.append(location_files_dictionary_shuffled[idx])
+        idx += 1
+
+    real_percentage = (n_files_test) / n_files
+
+    if real_percentage - test_size_percentage > split_percentage_error_tolerance:
+        raise ValueError(
+            "Impossible to perform datatest TRAIN/EVAL "
+            + str(test_size_percentage)
+            + " splitting with tolerance: "
+            + str(split_percentage_error_tolerance * 100)
+            + " % by using SEED: "
+            + str(seed)
+            + ". Try to change seed."
+        )
+
+    # Placheholders
+    test_files = []
+    train_files = []
+
+    # Splitting files according to the selected locations
+    for filename in filenames:
+        filename_tr = filename.split(os.sep)[-1]
+        if filename_tr[-4] == "_":
+            # Fire event (Format: location_idx_granule_number)
+            location = filename_tr[:-4]
+        else:
+            # Volcano event (Format: location_idx0idx1_granule_number)
+            location = filename_tr[:-5]
+        # If the location of the file is in the designated test ones, move the file into test files.
+        if location in files_locations_tests_list:
+            test_files.append(filename)
+        else:
+            train_files.append(filename)
+    return train_files, test_files
+
+
 # Sentinel-2 band names
 BAND_LIST = [
     "B01",

@@ -1,5 +1,7 @@
-import argparse
 import shutil
+
+import os 
+import toml
 
 import torch
 import torch.nn as nn
@@ -34,12 +36,12 @@ class CustomDataParallel(nn.DataParallel):
             return getattr(self.module, key)
 
 
-def configure_optimizers(net, args):
+def configure_optimizers(net, cfg):
     """Separate parameters for the main optimizer and the auxiliary optimizer.
     Return two optimizers"""
     conf = {
-        "net": {"type": "Adam", "lr": args.learning_rate},
-        "aux": {"type": "Adam", "lr": args.aux_learning_rate},
+        "net": {"type": "Adam", "lr": cfg.learning_rate},
+        "aux": {"type": "Adam", "lr": cfg.aux_learning_rate},
     }
     optimizer = net_aux_optimizer(net, conf)
     return optimizer["net"], optimizer["aux"]
@@ -50,123 +52,73 @@ def save_checkpoint(state, is_best, filename="checkpoint.pth.tar"):
     if is_best:
         shutil.copyfile(filename, "checkpoint_best_loss.pth.tar")
 
+def check_cfg(config):
+    """
+    Checks the validity of the config entries.
 
-def parse_args(argv):
-    parser = argparse.ArgumentParser(description="Example training script.")
-    parser.add_argument(
-        "-m",
-        "--model",
-        default="bmshj2018-factorized",
-        choices=image_models.keys(),
-        help="Model architecture (default: %(default)s)",
-    )
-    parser.add_argument(
-        "-d", "--dataset", type=str, required=True, help="Training dataset"
-    )
-    parser.add_argument(
-        "-e",
-        "--epochs",
-        default=100,
-        type=int,
-        help="Number of epochs (default: %(default)s)",
-    )
-    parser.add_argument(
-        "-t",
-        "--simulation_time",
-        default=100,
-        type=float,
-        help="Simulation runtime in seconds (default: %(default)s)",
-    )
-    parser.add_argument(
-        "-lr",
-        "--learning-rate",
-        default=1e-4,
-        type=float,
-        help="Learning rate (default: %(default)s)",
-    )
-    parser.add_argument(
-        "-n",
-        "--num-workers",
-        type=int,
-        default=1,
-        help="Dataloaders threads (default: %(default)s)",
-    )
-    parser.add_argument(
-        "--lmbda",
-        dest="lmbda",
-        type=float,
-        default=1e-2,
-        help="Bit-rate distortion parameter (default: %(default)s)",
-    )
-    parser.add_argument(
-        "--batch-size", type=int, default=16, help="Batch size (default: %(default)s)"
-    )
-    parser.add_argument(
-        "--test-batch-size",
-        type=int,
-        default=64,
-        help="Test batch size (default: %(default)s)",
-    )
-    parser.add_argument(
-        "--aux-learning-rate",
-        type=float,
-        default=1e-3,
-        help="Auxiliary loss learning rate (default: %(default)s)",
-    )
-    parser.add_argument(
-        "--patch-size",
-        type=int,
-        nargs=2,
-        default=(256, 256),
-        help="Size of the patches to be cropped (default: %(default)s)",
-    )
-    parser.add_argument("--cuda", action="store_true", help="Use cuda")
-    parser.add_argument(
-        "--save", action="store_true", default=True, help="Save model to disk"
-    )
-    parser.add_argument("--seed", type=int, help="Set random seed for reproducibility")
-    parser.add_argument(
-        "--clip_max_norm",
-        default=1.0,
-        type=float,
-        help="gradient clipping max norm (default: %(default)s",
-    )
+    Args:
+        config (dict): A dictionary containing the configuration parameters.
 
-    parser.add_argument(
-        "--use_l0_data",
-        action="store_true",
-        default=False,
-        help="If specified, l0 data are used.",
-    )
+    Raises:
+        AssertionError: If any of the config entries are invalid or missing.
+    """
+    # Check if the model is valid
+    assert config["model"] in image_models.keys(), "Invalid model"
 
-    parser.add_argument(
-        "--l0_format",
-        type=str,
-        default="raw",
-        help="L0 dataset format. It can be ""raw"", ""merged"".",
-    )
+    # Check if the dataset is specified
+    assert config["dataset"], "Dataset is required"
 
-    parser.add_argument(
-        "--train_split_percentage",
-        type=float,
-        default=0.8,
-        help="Percentage of train partition. Used only for l0 data.",
-    )
+    # Check if the epochs are positive
+    assert config["epochs"] > 0, "Epochs must be positive"
 
-    parser.add_argument(
-        "--preloaded",
-        action="store_true",
-        default=False,
-        help="If used, data are preloaded.",
-    )
+    # Check if the simulation time is positive
+    assert config["simulation_time"] > 0, "Simulation time must be positive"
 
-    parser.add_argument(
-        "--target_resolution_merged_m",
-        type=float,
-        default=20,
-        help="For l0 data, image target resolution for merged mode.",
-    )
+    # Check if the learning rate is positive
+    assert config["learning_rate"] > 0, "Learning rate must be positive"
 
-    parser.add_argument("--checkpoint", type=str, help="Path to a checkpoint")
-    args = parser.parse_args(argv)
-    return args
+    # Check if the num workers are non-negative
+    assert config["num_workers"] >= 0, "Num workers must be non-negative"
+
+    # Check if the lambda is positive
+    assert config["lambda"] > 0, "Lambda must be positive"
+
+    # Check if the batch size is positive
+    assert config["batch_size"] > 0, "Batch size must be positive"
+
+    # Check if the test batch size is positive
+    assert config["test_batch_size"] > 0, "Test batch size must be positive"
+
+    # Check if the aux learning rate is positive
+    assert config["aux_learning_rate"] > 0, "Aux learning rate must be positive"
+
+    # Check if the patch size has two elements and they are both positive
+    assert len(config["patch_size"]) == 2 and all(x > 0 for x in config["patch_size"]), "Patch size must have two positive elements"
+
+    # Check if cuda is a boolean value
+    assert isinstance(config["cuda"], bool), "Cuda must be a boolean value"
+
+    # Check if pretrained is a boolean value
+    assert isinstance(config["pretrained"], bool), "pretrained must be a boolean value"
+
+    # Check if save is a boolean value
+    assert isinstance(config["save"], bool), "Save must be a boolean value"
+
+    # If seed is specified, check if it is an integer value
+    if config.get("seed"):
+        assert isinstance(config["seed"], int), "Seed must be an integer value"
+        
+    # If checkpoint is specified, check if it exists and it has a valid extension (.pt or .pth)
+    if config.get("checkpoint"):
+        assert os.path.exists(config["checkpoint"]), f"Checkpoint {config['checkpoint']} does not exist"
+        assert os.path.splitext(config["checkpoint"])[1] in [".pt", ".pth"], f"Checkpoint {config['checkpoint']} has an invalid extension"
+
+    # Check model quality values
+    assert config.model_quality > 0 and  config.model_quality < 9
+
+    # Check l0 values
+    assert config.l0_format in ["raw","merged"]
+    assert isinstance(config.use_l0_data, bool)
+    assert isinstance(config.l0_target_resolution_merged_m, float)
+    assert isinstance(config.l0_train_test_split, float)
+    assert config.l0_train_test_split >= 0 and  config.l0_train_test_split <= 1.0

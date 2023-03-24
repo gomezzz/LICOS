@@ -9,7 +9,7 @@ dependencies:
   - ipywidgets
   - loguru
   - mpi4py
-  - numpy
+  - numpy==1.23.5
   - pandas
   - pykep
   - python=3.10

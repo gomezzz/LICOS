@@ -15,6 +15,7 @@ from l0_utils import (
 )
 import torch
 from sklearn.model_selection import train_test_split
+from copy import deepcopy
 
 
 @register_dataset("L0ImageFolder")
@@ -51,7 +52,7 @@ class L0ImageFolder(Dataset):
             target_resolution_merged_m (float, optional): target resolution in m when merged format is used. Defaults to 20.0.
             transform (callable, optional): a function or transform that takes in tensor and returns a transformed version.
             preloaded (bool, optional): if True, images are preloaded. Defaults to True.
-            split (str, optional): split mode ('train', 'eval' or 'test'). Defaults to "train".
+            split (str, optional): split mode ('train', 'validation' or 'test'). Defaults to "train".
 
         Raises:
             RuntimeError: Invalid directory.
@@ -81,10 +82,13 @@ class L0ImageFolder(Dataset):
 
         if split == "train":
             self.samples = train_samples
-        elif split == "eval":
+        elif split == "validation":
             self.samples = eval_samples
         else:
             self.samples = test_samples
+
+        # Storing filenames
+        self.samples_filename = deepcopy(self.samples)
 
         # Target resolution in m for merged format.
         self.target_resolution_merged_m = target_resolution_merged_m

@@ -34,7 +34,7 @@ def init_training(cfg, rank):
         [transforms.RandomCrop(cfg.patch_size), transforms.ToTensor()]
     )
 
-    eval_transforms = transforms.Compose(
+    validation_transforms = transforms.Compose(
         [transforms.CenterCrop(cfg.patch_size), transforms.ToTensor()]
     )
 
@@ -43,29 +43,31 @@ def init_training(cfg, rank):
             root=cfg.dataset,
             seed=cfg.seed,
             test_over_total_percentage=cfg.test_over_tot_p,
-            valid_over_train_percentage=cfg.eval_over_train_p,
+            valid_over_train_percentage=cfg.validation_over_train_p,
             l0_format=cfg.l0_format,
             target_resolution_merged_m=cfg.l0_target_resolution_merged_m,
             preloaded=True,
             split="train",
             transform=train_transforms,
         )
-        eval_dataset = L0ImageFolder(
+        validation_dataset = L0ImageFolder(
             root=cfg.dataset,
             seed=cfg.seed,
             test_over_total_percentage=cfg.test_over_tot_p,
-            valid_over_train_percentage=cfg.eval_over_train_p,
+            valid_over_train_percentage=cfg.validation_over_train_p,
             l0_format=cfg.l0_format,
             target_resolution_merged_m=cfg.l0_target_resolution_merged_m,
             preloaded=True,
-            split="eval",
-            transform=eval_transforms,
+            split="validation",
+            transform=validation_transforms,
         )
     else:
         train_dataset = ImageFolder(
             cfg.dataset, split="train", transform=train_transforms
         )
-        eval_dataset = ImageFolder(cfg.dataset, split="test", transform=eval_transforms)
+        validation_dataset = ImageFolder(
+            cfg.dataset, split="test", transform=validation_transforms
+        )
 
     device = "cuda:" + str(rank) if cfg.cuda and torch.cuda.is_available() else "cpu"
 
@@ -80,8 +82,8 @@ def init_training(cfg, rank):
 
     train_dataloader_iter = iter(train_dataloader)
 
-    eval_dataloader = DataLoader(
-        eval_dataset,
+    validation_dataloader = DataLoader(
+        validation_dataset,
         batch_size=cfg.test_batch_size,
         num_workers=cfg.num_workers,
         shuffle=False,
@@ -154,7 +156,7 @@ def init_training(cfg, rank):
         aux_optimizer,
         criterion,
         train_dataloader,
-        eval_dataloader,
+        validation_dataloader,
         lr_scheduler,
         last_epoch,
         train_dataloader_iter,

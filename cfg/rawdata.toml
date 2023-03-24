@@ -61,7 +61,7 @@ l0_format = "raw"
 l0_target_resolution_merged_m = 20.0
 
 # Percentage of train partition over the whole dataset. Used only for l0 data.
-test_over_tot_p = 0.1
+test_over_tot = 0.15
 
 # Percentage of eval partition over train. Used only for l0 data.
-eval_over_train_p = 0.11111111111111105
+validation_over_train = 0.1333333333

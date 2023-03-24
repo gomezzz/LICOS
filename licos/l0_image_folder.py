@@ -16,8 +16,6 @@ from l0_utils import (
 import torch
 from sklearn.model_selection import train_test_split
 
-from l0_utils import BAND_LIST, DN_MAX, image_band_reshape, IMAGE_SHAPE_DICT
-
 
 @register_dataset("L0ImageFolder")
 class L0ImageFolder(Dataset):
@@ -44,8 +42,10 @@ class L0ImageFolder(Dataset):
         Args:
             root (string): root directory of the dataset
             seed (int): split seed.
-            test_over_total_percentage (float): split percentage over the whole dataset (e.g., 0.8 means 80% train and 20% test fot the total dataset).
-            valid_over_train_percentage (float): split percentage over the whole dataset (e.g., 0.1 means validation is 10% over the train dataset).
+            test_over_total_percentage (float): split percentage over the whole dataset
+            (e.g., 0.8 means 80% train and 20% test fot the total dataset).
+            valid_over_train_percentage (float): split percentage over the whole dataset
+            (e.g., 0.1 means validation is 10% over the train dataset).
             l0_format (string): use "raw" to load bands separately, "merged" to load all the bands in one,
             "merged_with_res", to merge bands with the same resolution.
             target_resolution_merged_m (float, optional): target resolution in m when merged format is used. Defaults to 20.0.

@@ -10,7 +10,8 @@ import os
 def geographical_splitter(
     filenames, test_size_percentage, seed=42, split_percentage_error_tolerance=0.01
 ):
-    """Splits the events according to a geographical position. In this way, patches related to a specific area can be only in train or in test.
+    """Splits the events according to a geographical position.
+    In this way, patches related to a specific area can be only in train or in test.
 
     Args:
         filenames (list): file names of the different images.

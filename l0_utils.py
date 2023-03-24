@@ -22,39 +22,18 @@ def geographical_splitter(
         list: train filenames
         list: test filenames
     """
+    # Parsing files and extracting volcanoes and fires events
+    events_name = [filname.split(os.sep)[-1] for filname in filenames]
+    volcanoes = [event[:-5] for event in events_name if event[-4] != "_"]
+    fires = [event[:-4] for event in events_name if event[-4] == "_"]
+    locations = sorted(volcanoes + fires)
     # locations - n_files dictionary
-    location_files_dictionary = {
-        "Fuego": 16,
-        "Sangay": 35,
-        "Piton_de_la_Fournaise": 31,
-        "Chillan_Nevados_de": 6,
-        "Barren_Island": 20,
-        "Nyamulagira": 18,
-        "Copahue": 6,
-        "Krysuvik-Trolladyngja": 24,
-        "Santa_Maria": 3,
-        "San_Miguel": 14,
-        "Mayon": 6,
-        "Stromboli": 10,
-        "Raung": 15,
-        "Etna": 14,
-        "La_Palma": 10,
-        "Karangetang": 6,
-        "Telica": 6,
-        "Tinakula": 9,
-        "Bolivia": 9,
-        "Sweden": 5,
-        "Kenya": 6,
-        "Greece": 31,
-        "Mexico": 6,
-        "Greenland": 7,
-        "Ukraine": 6,
-        "Italy": 7,
-        "Latvia": 16,
-        "Australia": 3,
-        "Spain": 8,
-        "France": 5,
-    }
+    location_files_dictionary = dict(
+        zip(
+            set(locations),
+            [locations.count(location) for location in set(locations)],
+        )
+    )
 
     # Copying locations to perform shuffle
     location_files_dictionary_shuffled = deepcopy(

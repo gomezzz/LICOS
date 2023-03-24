@@ -2,7 +2,7 @@
 model = "bmshj2018-factorized"
 
 # Training dataset
-dataset = "my_tif_dir"
+dataset =  "my_tif_dir"
 
 # Simulation runtime in seconds
 simulation_time = 10000.0
@@ -35,7 +35,7 @@ cuda = true
 save = true
 
 # Set random seed for reproducibility
-seed = 42
+seed = 2
 
 # Gradient clipping max norm
 clip_max_norm = 1.0
@@ -60,5 +60,9 @@ l0_format = "raw"
 # For l0 data, image target resolution for merged mode.
 l0_target_resolution_merged_m = 20.0
 
-# Percentage of train partition. Used only for l0 data.",
-l0_train_test_split = 0.8
+# Percentage of train partition over the whole dataset. Used only for l0 data.
+test_over_tot = 0.1
+
+# Percentage of validation partition over train. Used only for l0 data.
+validation_over_train = 0.11111111111111105
+

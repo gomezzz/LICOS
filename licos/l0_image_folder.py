@@ -6,10 +6,16 @@ import numpy as np
 import rasterio
 from compressai.registry import register_dataset
 from torchvision import transforms
+from l0_utils import (
+    BAND_LIST,
+    DN_MAX,
+    geographical_splitter,
+    image_band_reshape,
+    IMAGE_SHAPE_DICT,
+)
 import torch
 from sklearn.model_selection import train_test_split
-
-from l0_utils import BAND_LIST, DN_MAX, image_band_reshape, IMAGE_SHAPE_DICT
+from copy import deepcopy
 
 
 @register_dataset("L0ImageFolder")
@@ -24,7 +30,8 @@ class L0ImageFolder(Dataset):
         self,
         root,
         seed,
-        test_train_split,
+        test_over_total_percentage,
+        valid_over_train_percentage,
         l0_format,
         target_resolution_merged_m=20.0,
         transform=None,
@@ -36,15 +43,16 @@ class L0ImageFolder(Dataset):
         Args:
             root (string): root directory of the dataset
             seed (int): split seed.
-            test_train_split (float): split percentage (e.g., 0.8 means 80% train and 20% test).
+            test_over_total_percentage (float): split percentage over the whole dataset
+            (e.g., 0.8 means 80% train and 20% test fot the total dataset).
+            valid_over_train_percentage (float): split percentage over the whole dataset
+            (e.g., 0.1 means validation is 10% over the train dataset).
             l0_format (string): use "raw" to load bands separately, "merged" to load all the bands in one,
             "merged_with_res", to merge bands with the same resolution.
-            target_resolution_merged_m (float, optional): target resolution in m when merged format is used.
-            Defaults to 20.0.
-            transform (callable, optional): a function or transform that takes in tensor and returns a
-            transformed version.
+            target_resolution_merged_m (float, optional): target resolution in m when merged format is used. Defaults to 20.0.
+            transform (callable, optional): a function or transform that takes in tensor and returns a transformed version.
             preloaded (bool, optional): if True, images are preloaded. Defaults to True.
-            split (str, optional): split mode ('train' or 'test'). Defaults to "train".
+            split (str, optional): split mode ('train', 'validation' or 'test'). Defaults to "train".
 
         Raises:
             RuntimeError: Invalid directory.
@@ -57,17 +65,30 @@ class L0ImageFolder(Dataset):
             raise RuntimeError(f'Invalid directory "{root}"')
 
         # Splitting according to seed
-        train_samples, test_samples, _, _ = train_test_split(
+        train_samples, test_samples = geographical_splitter(
             l0_files,
-            l0_files,  # Added since labels are needed but not used.
-            test_size=(1 - test_train_split),
+            test_size_percentage=test_over_total_percentage,
+            seed=seed,
+            split_percentage_error_tolerance=0.01,
+        )
+
+        # Splitting according to seed
+        train_samples, eval_samples, _, _ = train_test_split(
+            train_samples,
+            train_samples,  # Added since labels are needed but not used.
+            test_size=valid_over_train_percentage,
             random_state=seed,
         )
 
         if split == "train":
             self.samples = train_samples
+        elif split == "validation":
+            self.samples = eval_samples
         else:
             self.samples = test_samples
+
+        # Storing filenames
+        self.samples_filename = deepcopy(self.samples)
 
         # Target resolution in m for merged format.
         self.target_resolution_merged_m = target_resolution_merged_m

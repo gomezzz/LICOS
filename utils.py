@@ -143,14 +143,21 @@ def parse_args(argv):
         "--l0_format",
         type=str,
         default="raw",
-        help="L0 dataset format. It can be ""raw"", ""merged"".",
+        help="L0 dataset format. It can be " "raw" ", " "merged" ".",
     )
 
     parser.add_argument(
-        "--train_split_percentage",
+        "--test_over_tot_p",
         type=float,
-        default=0.8,
-        help="Percentage of train partition. Used only for l0 data.",
+        default=0.2,
+        help="Percentage of test partition over the whole dataset. Used only for l0 data.",
+    )
+
+    parser.add_argument(
+        "--eval_over_train_p",
+        type=float,
+        default=0.125,
+        help="Percentage of eval partition over the train dataset. Used only for l0 data.",
     )
 
     parser.add_argument(

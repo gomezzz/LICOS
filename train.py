@@ -16,7 +16,6 @@ from utils import AverageMeter, CustomDataParallel, configure_optimizers
 from l0_image_folder import L0ImageFolder
 
 from model_utils import get_model
-from l0_utils import get_model
 
 
 def init_training(args, rank):
@@ -38,7 +37,7 @@ def init_training(args, rank):
         [transforms.RandomCrop(args.patch_size), transforms.ToTensor()]
     )
 
-    test_transforms = transforms.Compose(
+    eval_transforms = transforms.Compose(
         [transforms.CenterCrop(args.patch_size), transforms.ToTensor()]
     )
 
@@ -46,29 +45,31 @@ def init_training(args, rank):
         train_dataset = L0ImageFolder(
             root=args.dataset,
             seed=args.seed,
-            test_train_split=args.train_split_percentage,
+            test_over_total_percentage=args.test_over_tot_p,
+            valid_over_train_percentage=args.eval_over_train_p,
             l0_format=args.l0_format,
             target_resolution_merged_m=args.target_resolution_merged_m,
             preloaded=args.preloaded,
             split="train",
             transform=train_transforms,
         )
-        test_dataset = L0ImageFolder(
+        eval_dataset = L0ImageFolder(
             root=args.dataset,
             seed=args.seed,
-            test_train_split=args.train_split_percentage,
+            test_over_total_percentage=args.test_over_tot_p,
+            valid_over_train_percentage=args.eval_over_train_p,
             l0_format=args.l0_format,
             target_resolution_merged_m=args.target_resolution_merged_m,
             preloaded=args.preloaded,
-            split="test",
-            transform=test_transforms,
+            split="eval",
+            transform=eval_transforms,
         )
     else:
         train_dataset = ImageFolder(
             args.dataset, split="train", transform=train_transforms
         )
-        test_dataset = ImageFolder(
-            args.dataset, split="test", transform=test_transforms
+        eval_dataset = ImageFolder(
+            args.dataset, split="test", transform=eval_transforms
         )
 
     device = "cuda:" + str(rank) if args.cuda and torch.cuda.is_available() else "cpu"
@@ -84,8 +85,8 @@ def init_training(args, rank):
 
     train_dataloader_iter = iter(train_dataloader)
 
-    test_dataloader = DataLoader(
-        test_dataset,
+    eval_dataloader = DataLoader(
+        eval_dataset,
         batch_size=args.test_batch_size,
         num_workers=args.num_workers,
         shuffle=False,
@@ -135,7 +136,7 @@ def init_training(args, rank):
         aux_optimizer,
         criterion,
         train_dataloader,
-        test_dataloader,
+        eval_dataloader,
         lr_scheduler,
         last_epoch,
         train_dataloader_iter,
@@ -298,6 +299,7 @@ def test_epoch(rank, epoch, test_dataloader, model, criterion):
     )
 
     return loss.avg
+
 
 def eval_test_set(
     rank,

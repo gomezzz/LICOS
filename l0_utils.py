@@ -92,7 +92,7 @@ def geographical_splitter(
 
     if real_percentage - test_size_percentage > split_percentage_error_tolerance:
         raise ValueError(
-            "Impossible to perform datatest TRAIN/EVAL "
+            "Impossible to perform datatest TRAIN/TEST "
             + str(test_size_percentage)
             + " splitting with tolerance: "
             + str(split_percentage_error_tolerance * 100)

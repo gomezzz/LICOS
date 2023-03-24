@@ -29,7 +29,7 @@ from eval_utils import (
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 dataset = "/home/pablo/raw_test/"
-seeds = [42]
+seeds = [2]
 cfg = DotMap(toml.load("cfg/l0.toml"), _dynamic=False)
 results_df = pd.DataFrame(
     columns=["Type", "Seed", "PSNR", "SSIM", "BPP", "Compression"]
@@ -65,7 +65,8 @@ for seed in seeds:
     test_data_raw = L0ImageFolder(
         dataset,
         cfg.seed,
-        cfg.l0_train_test_split,
+        cfg.l0_test_over_tot,
+        cfg.l0_validation_over_train,
         "raw",
         cfg.l0_target_resolution_merged_m,
         split="test",
@@ -73,7 +74,8 @@ for seed in seeds:
     test_data_merged = L0ImageFolder(
         dataset,
         cfg.seed,
-        cfg.l0_train_test_split,
+        cfg.l0_test_over_tot,
+        cfg.l0_validation_over_train,
         "merged",
         cfg.l0_target_resolution_merged_m,
         split="test",

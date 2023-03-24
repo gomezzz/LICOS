@@ -37,6 +37,7 @@ class L0ImageFolder(Dataset):
         transform=None,
         preloaded=True,
         split="train",
+        geographical_split_tolerance=0.01,
     ):
         """Init function for L0ImageFolder.
 
@@ -53,7 +54,7 @@ class L0ImageFolder(Dataset):
             transform (callable, optional): a function or transform that takes in tensor and returns a transformed version.
             preloaded (bool, optional): if True, images are preloaded. Defaults to True.
             split (str, optional): split mode ('train', 'validation' or 'test'). Defaults to "train".
-
+            geographical_split_tolerance (float, optional): Tolerance on geographical splitting (percentage). Defaults to 0.01.
         Raises:
             RuntimeError: Invalid directory.
             ValueError: Not implemented.
@@ -69,7 +70,7 @@ class L0ImageFolder(Dataset):
             l0_files,
             test_size_percentage=test_over_total_percentage,
             seed=seed,
-            split_percentage_error_tolerance=0.01,
+            split_percentage_error_tolerance=geographical_split_tolerance,
         )
 
         # Splitting according to seed

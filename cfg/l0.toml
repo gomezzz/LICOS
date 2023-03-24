@@ -61,8 +61,11 @@ l0_format = "raw"
 l0_target_resolution_merged_m = 20.0
 
 # Percentage of train partition over the whole dataset. Used only for l0 data.
-test_over_tot = 0.1
+l0_test_over_tot = 0.1
 
 # Percentage of validation partition over train. Used only for l0 data.
-validation_over_train = 0.11111111111111105
+l0_validation_over_train = 0.11111111111111105
+
+# Tolerance (percentage) on test/ train geographical splitting. Used only for l0 data.
+l0_train_test_tolerance= 0.01
 

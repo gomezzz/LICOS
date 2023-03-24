@@ -257,7 +257,7 @@ def main(cfg):
         np.array(local_time_at_test),
         delimiter=",",
     )
-    toml.dump(cfg,open(cfg.save_path + "/cfg.toml","w"))
+    toml.dump(cfg, open(cfg.save_path + "/cfg.toml", "w"))
     print(f"Rank {rank} finished.")
 
 

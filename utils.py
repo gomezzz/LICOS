@@ -156,7 +156,7 @@ def parse_args(argv):
     parser.add_argument(
         "--eval_over_train_p",
         type=float,
-        default=0.125,
+        default=0.11111111111111105,
         help="Percentage of eval partition over the train dataset. Used only for l0 data.",
     )
 

@@ -28,16 +28,24 @@ from eval_utils import (
 )
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
-dataset = "/home/pablo/raw_test/"
 seeds = [2]
 cfg = DotMap(toml.load("cfg/l0.toml"), _dynamic=False)
+
+# Small dataset
+dataset = "/home/pablo/raw_test/"
+cfg.l0_train_test_tolerance = 0.5
+cfg.l0_test_over_tot = 0.5
+cfg.l0_validation_over_train = 0.5
+
+# Large dataset
+# dataset = "/home/pablo/rawdata/my_tif_dir"
+
 results_df = pd.DataFrame(
     columns=["Type", "Seed", "PSNR", "SSIM", "BPP", "Compression"]
 )
 
 for seed in seeds:
     cfg.seed = seed
-
     checkpoint_path = (
         "results/bmshj2018-factorizedqual=1_l0=raw_seed=" + str(seed) + ".pth.tar"
     )
@@ -70,6 +78,7 @@ for seed in seeds:
         "raw",
         cfg.l0_target_resolution_merged_m,
         split="test",
+        geographical_split_tolerance=cfg.l0_train_test_tolerance,
     )
     test_data_merged = L0ImageFolder(
         dataset,
@@ -79,6 +88,7 @@ for seed in seeds:
         "merged",
         cfg.l0_target_resolution_merged_m,
         split="test",
+        geographical_split_tolerance=cfg.l0_train_test_tolerance,
     )
 
     print("Computing metrics")

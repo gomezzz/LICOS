@@ -42,24 +42,26 @@ def init_training(cfg, rank):
         train_dataset = L0ImageFolder(
             root=cfg.dataset,
             seed=cfg.seed,
-            test_over_total_percentage=cfg.test_over_tot,
-            valid_over_train_percentage=cfg.validation_over_train,
+            test_over_total_percentage=cfg.l0_test_over_tot,
+            valid_over_train_percentage=cfg.l0_validation_over_train,
             l0_format=cfg.l0_format,
             target_resolution_merged_m=cfg.l0_target_resolution_merged_m,
             preloaded=True,
             split="train",
             transform=train_transforms,
+            geographical_split_tolerance=cfg.l0_train_test_tolerance,
         )
         validation_dataset = L0ImageFolder(
             root=cfg.dataset,
             seed=cfg.seed,
-            test_over_total_percentage=cfg.test_over_tot,
-            valid_over_train_percentage=cfg.validation_over_train,
+            test_over_total_percentage=cfg.l0_test_over_tot,
+            valid_over_train_percentage=cfg.l0_validation_over_train,
             l0_format=cfg.l0_format,
             target_resolution_merged_m=cfg.l0_target_resolution_merged_m,
             preloaded=True,
             split="validation",
             transform=validation_transforms,
+            geographical_split_tolerance=cfg.l0_train_test_tolerance,
         )
     else:
         train_dataset = ImageFolder(

@@ -38,6 +38,7 @@ class L0ImageFolder(Dataset):
         preloaded=True,
         split="train",
         geographical_split_tolerance=0.01,
+        n_bit_range=8,
     ):
         """Init function for L0ImageFolder.
 
@@ -55,6 +56,7 @@ class L0ImageFolder(Dataset):
             preloaded (bool, optional): if True, images are preloaded. Defaults to True.
             split (str, optional): split mode ('train', 'validation' or 'test'). Defaults to "train".
             geographical_split_tolerance (float, optional): Tolerance on geographical splitting (percentage). Defaults to 0.01.
+            n_bit_range (float, optional): number of bits of range. Defaults to 8.
         Raises:
             RuntimeError: Invalid directory.
             ValueError: Not implemented.
@@ -110,6 +112,9 @@ class L0ImageFolder(Dataset):
 
         # If True,images are preloaded
         self.preloaded = preloaded
+
+        # Range
+        self.n_bit_range = n_bit_range
 
         if self.l0_format == "raw":
             # Reshape samples to have a new sample for each band
@@ -184,8 +189,13 @@ class L0ImageFolder(Dataset):
         """
 
         with rasterio.open(band_path) as src:
+            band = src.read(1) / (
+                (DN_MAX + 1) / 2**self.n_bit_range
+            )  # Discarding least significant bits
+            band = band.astype(np.uint8)  # Quantizing on 8 bits
             return (
-                torch.from_numpy(src.read(1).astype(np.float32)).unsqueeze(0) / DN_MAX
+                torch.from_numpy(band.astype(np.float32)).unsqueeze(0)
+                / 2**self.n_bit_range
             )
 
     def __getitem__(self, index):

@@ -127,6 +127,9 @@ BAND_SPATIAL_RESOLUTION_DICT = dict(
 # Digital number max - 12 bits
 DN_MAX = 2**12 - 1
 
+# Scale factor
+
+
 # Target image shape
 IMAGE_SHAPE_DICT = {10.0: [2304, 2592], 20.0: [1152, 1296], 60.0: [384, 432]}
 

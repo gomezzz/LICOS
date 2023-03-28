@@ -192,7 +192,7 @@ class L0ImageFolder(Dataset):
         with rasterio.open(band_path) as src:
             band = src.read(1) / DN_MAX  # Converting to [0,1] range
             if not (self.use_full_range):
-                band = img_as_ubyte(band)
+                band = img_as_ubyte(band) / 255
             return torch.from_numpy(band.astype(np.float32)).unsqueeze(0)
 
     def __getitem__(self, index):

@@ -16,6 +16,7 @@ dependencies:
   - pytorch
   - rasterio 
   - scipy
+  - scikit-image
   - scikit-learn
   - scikit-spatial
   - skyfield

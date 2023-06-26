@@ -14,7 +14,7 @@ Learning Image Compression On board a Satellite constellation
 
 ## About the Project
 
-This is the code repository for the paper [Solving the Satellite Downlink Bottleneck: Distributed Onboard Learning of Image Compression](TODO). It provides the means to train and test an image compression model based on the Python module [CompressAI](https://interdigitalinc.github.io/CompressAI/) combined with the [PASEOS](https://www.github.com/aidotse/PASEOS) module to simulate physical constraints on the training. The paper demonstrates the onboard training of raw, unprocessed Sentinel-2 data but also works for postprocessed data such as the [AID dataset](https://captain-whu.github.io/AID/). We use [mpi4py](https://mpi4py.readthedocs.io/en/stable/) to distribute the training cross multiple devices / GPUs.
+This is the code repository for the paper [Solving the Satellite Downlink Bottleneck: Distributed Onboard Learning of Image Compression](TODO). It provides the means to train and test an image compression model based on the Python module [CompressAI](https://interdigitalinc.github.io/CompressAI/) combined with the [PASEOS](https://www.github.com/aidotse/PASEOS) module to simulate physical constraints on the training. The paper demonstrates the onboard training of raw, unprocessed Sentinel-2 data but also works for postprocessed data such as the [AID dataset](https://captain-whu.github.io/AID/). To test on raw data, it uses the [THRawS dataset](https://zenodo.org/record/7908728) consisting of more than 100 samples (originally focusing on wildfires and volcanoes) from all over the world. We use [mpi4py](https://mpi4py.readthedocs.io/en/stable/) to distribute the training cross multiple devices / GPUs.
 
 ## Getting Started
 
@@ -66,4 +66,4 @@ You can evaluate a trained model by using the `eval_script.py` script. It may re
 
 ## Contact
 
-If you have any questions, feel to reach out to @gomezzz (email: `pablo.gomez at esa.int`) or @GabrieleMeoni (email: `TODO`). You can also open an issue on the GitHub repository.
+If you have any questions, feel to reach out to @gomezzz (email: `pablo.gomez at esa.int`) or @GabrieleMeoni (email: `G.Meoni@tudelft.nl`). You can also open an issue on the GitHub repository.

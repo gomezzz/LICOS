@@ -52,6 +52,12 @@ model_quality = 1
 # Whether to use l0 data
 use_l0_data = false
 
+# Time needed for communications in seconds
+time_for_comms = 60.0
+
+# estimated time per batch in seconds
+time_per_batch = 1.0
+
 # L0 data formatting 
 # raw - as 13 individual bands
 # merged - 13 channel img

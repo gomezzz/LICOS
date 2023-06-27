@@ -25,7 +25,9 @@ from utils import get_savepath_str
 def main(cfg):
     # Init
     rank = 0  # compute index of this node
-    assert cfg.time_per_batch < 30, "For a high time per batch you may miss comms windows?"
+    assert (
+        cfg.time_per_batch < 30
+    ), "For a high time per batch you may miss comms windows?"
     assert cfg.time_for_comms > 0, "Time for comms must be positive"
     time_in_standby = 0
     time_since_last_update = 0
@@ -98,7 +100,9 @@ def main(cfg):
     while total_simulation_time < cfg.simulation_time:
         ################################################################################
         # Sync time between ranks to minimize divergence
-        if (local_actor.local_time.mjd2000 * pk.DAY2SEC - time_of_last_sync) > MPI_sync_period:
+        if (
+            local_actor.local_time.mjd2000 * pk.DAY2SEC - time_of_last_sync
+        ) > MPI_sync_period:
             print(f"Rank {rank} waiting for sync", end=" ")
             sys.stdout.flush()
             comm.Barrier()
@@ -238,7 +242,9 @@ def main(cfg):
         if plot and batch_idx % 10 == 0 and rank == 0:
             plotter.update(paseos_instance)
 
-        total_simulation_time = paseos_instance._state.time - paseos_instance._cfg.sim.start_time
+        total_simulation_time = (
+            paseos_instance._state.time - paseos_instance._cfg.sim.start_time
+        )
 
     Path(cfg.save_path + "/").mkdir(parents=True, exist_ok=True)
     paseos_instance.save_status_log_csv(cfg.save_path + "/" + str(rank) + ".csv")

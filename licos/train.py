@@ -64,8 +64,12 @@ def init_training(cfg, rank):
             geographical_split_tolerance=cfg.l0_train_test_tolerance,
         )
     else:
-        train_dataset = ImageFolder(cfg.dataset, split="train", transform=train_transforms)
-        validation_dataset = ImageFolder(cfg.dataset, split="test", transform=validation_transforms)
+        train_dataset = ImageFolder(
+            cfg.dataset, split="train", transform=train_transforms
+        )
+        validation_dataset = ImageFolder(
+            cfg.dataset, split="test", transform=validation_transforms
+        )
 
     device = "cuda:" + str(rank) if cfg.cuda and torch.cuda.is_available() else "cpu"
 
@@ -104,7 +108,9 @@ def init_training(cfg, rank):
                 quality=cfg.model_quality,
             )
     else:
-        net = image_models[cfg.model](quality=cfg.model_quality, pretrained=cfg.pretrained)
+        net = image_models[cfg.model](
+            quality=cfg.model_quality, pretrained=cfg.pretrained
+        )
 
     if cfg.use_l0_data:
         if cfg.l0_format == "raw":
@@ -122,7 +128,9 @@ def init_training(cfg, rank):
                 quality=cfg.model_quality,
             )
     else:
-        net = image_models[cfg.model](quality=cfg.model_quality, pretrained=cfg.pretrained)
+        net = image_models[cfg.model](
+            quality=cfg.model_quality, pretrained=cfg.pretrained
+        )
 
     net = net.to(device)
 

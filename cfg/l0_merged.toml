@@ -55,7 +55,7 @@ time_for_comms = 18.375
 # estimated time per batch in seconds
 # note that this was computed for batchsize 16
 # on a unibap iX10-100
-time_per_batch = 13.63560
+time_per_batch = 10.0
 
 # Whether to use l0 data
 use_l0_data = true

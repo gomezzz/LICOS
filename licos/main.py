@@ -64,6 +64,7 @@ def main(cfg):
         print("Removing old model...")
         os.remove(cfg.save_path + ".pth.tar")
 
+    print("Loading dataset...")
     # Init training
     (
         net,
@@ -219,8 +220,7 @@ def main(cfg):
                 batch_idx,
                 cfg.clip_max_norm,
             )
-            if batch_idx % 10 == 0:
-                print(f"Training one batch took {time.time() - start}s")
+            print(f"Training batch took {time.time() - start} seconds.")
 
             batch_idx += 1
         else:

@@ -206,7 +206,7 @@ def train_one_batch(
     d = d.to(device)
     optimizer.zero_grad()
     aux_optimizer.zero_grad()
-    # print("Training data shape=", d.shape)
+    print("Training data shape=", d.shape)
     out_net = model(d)
 
     out_criterion = criterion(out_net, d)

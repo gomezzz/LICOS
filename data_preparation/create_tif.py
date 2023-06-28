@@ -1,7 +1,7 @@
 import os
 import sys
-sys.path.insert(1, "pyraws")
-from pyraws.raws.raw_event import Raw_event
+sys.path.insert(1, "PyRawS")
+from pyraws.raw.raw_event import Raw_event
 from pyraws.utils.database_utils import get_events_list
 import argparse
 import torch
@@ -55,36 +55,32 @@ def main():
 
         raw_event_swir = Raw_event()
         raw_event_swir.from_database(event, ["B8A", "B11", "B12"], verbose=False)
-        raw_event_rgb = raw_event()
+        raw_event_rgb = Raw_event()
         raw_event_rgb.from_database(event, ["B02", "B03", "B04"], verbose=False)
         granules_list = list(range(len(raw_event.get_granules_info().keys())))
 
         for granule in granules_list:
-            l0_granule_n = raw_event.get_granule(granule)
-            granule_info = l0_granule_n.get_granule_info()
+            raw_granule_n = raw_event.get_granule(granule)
+            granule_info = raw_granule_n.get_granule_info()
             save_path_n = os.path.join(
                 pargs.output_tif_dir,
                 event
                 + "_"
                 + str(granule)
-                + "_"
-                + granule_info[0][:3]
-                + "_"
-                + granule_info[4],
             )
             os.makedirs(save_path_n, exist_ok=True)
             print(
                 "Exporting to tif file: " + colored(event + "_" + str(granule), "green")
             )
-            l0_granule_n.export_to_tif(save_path_n)
-            l0_granule_rgb_n = raw_event_rgb.coarse_coregistration([granule])
-            l0_granule_swir_n = raw_event_swir.coarse_coregistration([granule])
-            l0_granule_rgb_n.show_bands_superimposition()
+            raw_granule_n.export_to_tif(save_path_n)
+            raw_granule_rgb_n = raw_event_rgb.coarse_coregistration([granule])
+            raw_granule_swir_n = raw_event_swir.coarse_coregistration([granule])
+            raw_granule_rgb_n.show_bands_superimposition()
             plt.savefig(
                 os.path.join(save_path_n, event + "_" + str(granule) + "_rgb.png")
             )
             plt.close()
-            l0_granule_swir_n.show_bands_superimposition()
+            raw_granule_swir_n.show_bands_superimposition()
             plt.savefig(
                 os.path.join(save_path_n, event + "_" + str(granule) + "_swir.png")
             )

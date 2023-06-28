@@ -30,5 +30,5 @@ To prepare your data, proceed as follows.
 
 ```python create_tif --help```
 
-
+9. `PyRawS` is not neded anymore and can be now removed.
 

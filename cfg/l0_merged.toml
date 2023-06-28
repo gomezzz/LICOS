@@ -2,7 +2,7 @@
 model = "bmshj2018-factorized"
 
 # Training dataset
-dataset =  "/home/pablo/ESA/LICOS/data/raw_test/"
+dataset =  "D:/Arbeit/Code/LICOS/data/raw_test/"
 
 # Simulation runtime in seconds
 simulation_time = 86400.0
@@ -50,7 +50,7 @@ pretrained = true
 model_quality = 1
 
 # Time needed for communications in seconds
-time_for_comms = 60.0
+time_for_comms = 18.375
 
 # estimated time per batch in seconds
 # note that this was computed for batchsize 16
@@ -69,12 +69,12 @@ l0_format = "merged"
 l0_target_resolution_merged_m = 20.0
 
 # Percentage of train partition over the whole dataset. Used only for l0 data.
-l0_test_over_tot = 0.1
+l0_test_over_tot = 0.2
 
 # Percentage of validation partition over train. Used only for l0 data.
-l0_validation_over_train = 0.5
+l0_validation_over_train = 0.125
 
 # Tolerance (percentage) on test/ train geographical splitting. Used only for l0 data.
 # Set high to allow testing with small datasets.
-l0_train_test_tolerance= 0.9
+l0_train_test_tolerance= 0.1
 

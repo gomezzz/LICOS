@@ -8,15 +8,23 @@ import torch
 from termcolor import colored
 from tqdm import tqdm
 import matplotlib.pyplot as plt
+from glob import glob
 
 
 def main():
     parser = argparse.ArgumentParser()
 
     parser.add_argument(
+        "--input_dir",
+        type=str,
+        help='Path to the THRAWS/raw directory.',
+        default="PyRawS/data/THRAWS/raw",
+    )
+
+    parser.add_argument(
         "--bands",
         type=str,
-        help='bands to coregister list in format ""[Bxx,Byy,...,Bzz]""',
+        help='bands to coregister list in format ""[Bxx,Byy,...,Bzz]"".',
         default="[B02,B08,B03,B10,B04,B05,B11,B06,B07,B8A,B12,B01,B09]",
     )
     parser.add_argument(
@@ -31,21 +39,29 @@ def main():
     requested_bands_str = requested_bands_str.replace(" ", "")[1:-1]
     bands = [x for x in requested_bands_str.split(",")]
     output_tif_dir = pargs.output_tif_dir
+    input_dir= pargs.input_dir
 
     os.makedirs(output_tif_dir, exist_ok=True)
+
+    pablo_files=glob("/home/pablo/rawdata/my_tif_dir/*")
+    pablo_events=[file.split("/")[-1] for file in pablo_files]
 
     if torch.cuda.is_available():
         device = torch.device("cuda")
     else:
         device = torch.device("cpu")
 
-    events_list = get_events_list("THRAWS")
+    #events_list = get_events_list("THRAWS")
+    thraws_files=sorted(glob(os.path.join(input_dir,"*")))
 
-    for event in tqdm(events_list, "Accessing event..."):
+    #events lift
+    events_list=[file.split(os.sep)[-1] for file in thraws_files]
+    
+    for event, file in tqdm(zip(events_list, thraws_files), "Accessing event..."):
         print("Processing event: ", colored(event, "blue") + ".")
         try:
             raw_event = Raw_event(device=device)
-            raw_event.from_database(event, bands, verbose=False)
+            raw_event.from_path(file, bands, verbose=False)
         except:
             print("Skipping event: ", colored(event, "red") + ".")
 
@@ -54,9 +70,9 @@ def main():
             continue
 
         raw_event_swir = Raw_event()
-        raw_event_swir.from_database(event, ["B8A", "B11", "B12"], verbose=False)
+        raw_event_swir.from_path(file, ["B8A", "B11", "B12"], verbose=False)
         raw_event_rgb = Raw_event()
-        raw_event_rgb.from_database(event, ["B02", "B03", "B04"], verbose=False)
+        raw_event_rgb.from_path(file, ["B02", "B03", "B04"], verbose=False)
         granules_list = list(range(len(raw_event.get_granules_info().keys())))
 
         for granule in granules_list:
@@ -68,6 +84,7 @@ def main():
                 + "_"
                 + str(granule)
             )
+
             os.makedirs(save_path_n, exist_ok=True)
             print(
                 "Exporting to tif file: " + colored(event + "_" + str(granule), "green")
@@ -84,7 +101,7 @@ def main():
             plt.savefig(
                 os.path.join(save_path_n, event + "_" + str(granule) + "_swir.png")
             )
-
+    
     print("processing " + colored("finished", "green") + ".")
 
 

@@ -1,8 +1,8 @@
 import os
 import sys
+
 sys.path.insert(1, "PyRawS")
 from pyraws.raw.raw_event import Raw_event
-from pyraws.utils.database_utils import get_events_list
 import argparse
 import torch
 from termcolor import colored
@@ -17,7 +17,7 @@ def main():
     parser.add_argument(
         "--input_dir",
         type=str,
-        help='Path to the THRAWS/raw directory.',
+        help="Path to the THRAWS/raw directory.",
         default="PyRawS/data/THRAWS/raw",
     )
 
@@ -39,24 +39,24 @@ def main():
     requested_bands_str = requested_bands_str.replace(" ", "")[1:-1]
     bands = [x for x in requested_bands_str.split(",")]
     output_tif_dir = pargs.output_tif_dir
-    input_dir= pargs.input_dir
+    input_dir = pargs.input_dir
 
     os.makedirs(output_tif_dir, exist_ok=True)
 
-    pablo_files=glob("/home/pablo/rawdata/my_tif_dir/*")
-    pablo_events=[file.split("/")[-1] for file in pablo_files]
+    pablo_files = glob("/home/pablo/rawdata/my_tif_dir/*")
+    pablo_events = [file.split("/")[-1] for file in pablo_files]
 
     if torch.cuda.is_available():
         device = torch.device("cuda")
     else:
         device = torch.device("cpu")
 
-    #events_list = get_events_list("THRAWS")
-    thraws_files=sorted(glob(os.path.join(input_dir,"*")))
+    # events_list = get_events_list("THRAWS")
+    thraws_files = sorted(glob(os.path.join(input_dir, "*")))
 
-    #events lift
-    events_list=[file.split(os.sep)[-1] for file in thraws_files]
-    
+    # events lift
+    events_list = [file.split(os.sep)[-1] for file in thraws_files]
+
     for event, file in tqdm(zip(events_list, thraws_files), "Accessing event..."):
         print("Processing event: ", colored(event, "blue") + ".")
         try:
@@ -77,13 +77,7 @@ def main():
 
         for granule in granules_list:
             raw_granule_n = raw_event.get_granule(granule)
-            granule_info = raw_granule_n.get_granule_info()
-            save_path_n = os.path.join(
-                pargs.output_tif_dir,
-                event
-                + "_"
-                + str(granule)
-            )
+            save_path_n = os.path.join(pargs.output_tif_dir, event + "_" + str(granule))
 
             os.makedirs(save_path_n, exist_ok=True)
             print(
@@ -101,7 +95,7 @@ def main():
             plt.savefig(
                 os.path.join(save_path_n, event + "_" + str(granule) + "_swir.png")
             )
-    
+
     print("processing " + colored("finished", "green") + ".")
 
 

@@ -2,7 +2,7 @@
 model = "bmshj2018-factorized"
 
 # Training dataset
-dataset =  "D:/Arbeit/Code/LICOS/data/raw_test/"
+dataset = "/home/pablo/rawdata/my_tif_dir/"
 
 # Simulation runtime in seconds
 simulation_time = 86400.0

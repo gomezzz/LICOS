@@ -19,7 +19,7 @@ Learning Image Compression On board a Satellite constellation
 This work is based on Sentinel-2 Raw data. included in the dataset [THRawS](https://zenodo.org/record/7908728#.ZGxSMHZBy3A).
 To prepare your data, proceed as follows. 
 
-1. Navigate to the `data_preparation` directory and clone [PyRawS](https://github.com/ESA-PhiLab/PyRawS) on it. PyRaWS provide APIs to process Sentinel-2 raw data.
+1. Navigate to the `data_preparation` directory and clone [PyRawS](https://github.com/ESA-PhiLab/PyRawS) in it. PyRaWS provide APIs to process Sentinel-2 raw data.
 2. Install PyRaWs as indicated in its [README](https://github.com/ESA-PhiLab/PyRawS#installation).
 3. Download [THRawS](https://zenodo.org/record/7908728#.ZGxSMHZBy3A). 
 4. Create a directory called `THRAWS`, including a subdirectory called `raw`. 

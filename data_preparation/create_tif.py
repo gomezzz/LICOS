@@ -43,9 +43,6 @@ def main():
 
     os.makedirs(output_tif_dir, exist_ok=True)
 
-    pablo_files = glob("/home/pablo/rawdata/my_tif_dir/*")
-    pablo_events = [file.split("/")[-1] for file in pablo_files]
-
     if torch.cuda.is_available():
         device = torch.device("cuda")
     else:
@@ -62,8 +59,10 @@ def main():
         try:
             raw_event = Raw_event(device=device)
             raw_event.from_path(file, bands, verbose=False)
-        except:
+        except: # noqa E722 
+
             print("Skipping event: ", colored(event, "red") + ".")
+            continue
 
         if raw_event.is_void():
             print("Skipping event: ", colored(event, "red") + ".")

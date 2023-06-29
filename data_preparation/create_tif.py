@@ -59,8 +59,7 @@ def main():
         try:
             raw_event = Raw_event(device=device)
             raw_event.from_path(file, bands, verbose=False)
-        except: # noqa E722 
-
+        except:  # noqa E722
             print("Skipping event: ", colored(event, "red") + ".")
             continue
 

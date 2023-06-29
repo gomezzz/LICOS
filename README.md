@@ -26,7 +26,7 @@ In the following we describe setting up the repo and launching a training run. F
 
 We recommend using [conda](https://docs.conda.io/en/latest/) to set-up your environment. This will also automatically set up CUDA and the cudatoolkit for you, enabling the use of GPUs for training, which is recommended.
 
-First of all clone the [GitHub](https://github.com/gomezzz/LICOS.git) repository as follows ([Git](https://git-scm.com/) required):
+First of all, clone the [GitHub](https://github.com/gomezzz/LICOS.git) repository as follows ([Git](https://git-scm.com/) required):
 
 ```
 git clone https://github.com/gomezzz/LICOS.git
@@ -48,7 +48,7 @@ conda activate licos
 
 ### Set up datasets
 
-To launch the training on, e.g.,`AID`, it is necessary to download the corresponding datasets. Please place the data in two folders `your_dataset/train` and `your_dataset/test` and create a config file in the `cfg` folder for your run. You need to specify the path to your dataset in the config file with the `dataset` parameter. Please have a look at the `cfg/default_cfg.toml` file for an example and additional explanations on different parameters. By default, we rely on the dataloaders used by CompressAI. See [here](https://interdigitalinc.github.io/CompressAI/datasets.html) for more information.
+To launch the training on, e.g.,`AID`, it is necessary to download the corresponding datasets. Please, place the data in two folders `your_dataset/train` and `your_dataset/test` and create a config file in the `cfg` folder for your run. You need to specify the path to your dataset in the config file with the `dataset` parameter. Please, have a look at the `cfg/default_cfg.toml` file for an example and additional explanations on different parameters. By default, we rely on the dataloaders used by CompressAI. See [here](https://interdigitalinc.github.io/CompressAI/datasets.html) for more information.
 
 If you want to use a custom dataset with non-RGB data, you may need to create a custom dataset class similar to the one in `l0_image_folder.py`.
 
@@ -60,11 +60,11 @@ To launch a training run, you can use the `main.py` script as follows:
 mpiexec -n 4 python main.py --cfg cfg/default_cfg.toml
 ```
 
-The parameter `--cfg` specifies the config file to use. The parameter `-n` specifies the number of processes to use. The number of processes should be equal to the number of satellite you want to simulate with PASEOS. Details on the constellation and satellite parameters can be found in the file `licos/init_paseos.py`.
+The parameter `--cfg` specifies the config file to use. The parameter `-n` specifies the number of processes to use. The number of processes should be equal to the number of satellites you want to simulate with PASEOS and matches the number of GPUs used, when GPUs are used. Details on the constellation and satellite parameters can be found in the file `licos/init_paseos.py`.
 
 ### Evaluating a trained model
 
-You can evaluate a trained model by using the `eval_script.py` script. It may require adjustments as it is hard-coded to be used with the rawdata Sentinel-2 data. By default it compares the compression to using JPEG.
+You can evaluate a trained model by using the `eval_script.py` script. It may require adjustments as it is hard-coded to be used with the rawdata Sentinel-2 data. By default, it compares the compression to using JPEG.
 
 ## Contact
 

@@ -6,6 +6,7 @@ import numpy as np
 import rasterio
 from compressai.registry import register_dataset
 from torchvision import transforms
+from skimage import img_as_ubyte
 from l0_utils import (
     BAND_LIST,
     DN_MAX,
@@ -38,6 +39,7 @@ class L0ImageFolder(Dataset):
         preloaded=True,
         split="train",
         geographical_split_tolerance=0.01,
+        use_full_range=False,
     ):
         """Init function for L0ImageFolder.
 
@@ -55,6 +57,7 @@ class L0ImageFolder(Dataset):
             preloaded (bool, optional): if True, images are preloaded. Defaults to True.
             split (str, optional): split mode ('train', 'validation' or 'test'). Defaults to "train".
             geographical_split_tolerance (float, optional): Tolerance on geographical splitting (percentage). Defaults to 0.01.
+            use_full_range (bool, optional): if True, full range is used. Otherwise 8-bit range. Defaults False.
         Raises:
             RuntimeError: Invalid directory.
             ValueError: Not implemented.
@@ -110,6 +113,9 @@ class L0ImageFolder(Dataset):
 
         # If True,images are preloaded
         self.preloaded = preloaded
+
+        # Range
+        self.use_full_range = use_full_range
 
         if self.l0_format == "raw":
             # Reshape samples to have a new sample for each band
@@ -184,9 +190,10 @@ class L0ImageFolder(Dataset):
         """
 
         with rasterio.open(band_path) as src:
-            return (
-                torch.from_numpy(src.read(1).astype(np.float32)).unsqueeze(0) / DN_MAX
-            )
+            band = src.read(1) / DN_MAX  # Converting to [0,1] range
+            if not (self.use_full_range):
+                band = img_as_ubyte(band) / 255
+            return torch.from_numpy(band.astype(np.float32)).unsqueeze(0)
 
     def __getitem__(self, index):
         """

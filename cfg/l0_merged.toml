@@ -2,10 +2,10 @@
 model = "bmshj2018-factorized"
 
 # Training dataset
-dataset =  "my_tif_dir"
+dataset = "/home/pablo/rawdata/my_tif_dir/"
 
 # Simulation runtime in seconds
-simulation_time = 10000.0
+simulation_time = 86400.0
 
 # Learning rate
 learning_rate = 1e-4
@@ -35,7 +35,7 @@ cuda = true
 save = true
 
 # Set random seed for reproducibility
-seed = 2
+seed = 42
 
 # Gradient clipping max norm
 clip_max_norm = 1.0
@@ -49,23 +49,32 @@ pretrained = true
 # Quality value for the model, 1 to 8
 model_quality = 1
 
+# Time needed for communications in seconds
+time_for_comms = 18.375
+
+# estimated time per batch in seconds
+# note that this was computed for batchsize 16
+# on a unibap iX10-100
+time_per_batch = 10.0
+
 # Whether to use l0 data
 use_l0_data = true
 
 # L0 data formatting 
 # raw - as 13 individual bands
 # merged - 13 channel img
-l0_format = "raw"
+l0_format = "merged"
 
 # For l0 data, image target resolution for merged mode.
 l0_target_resolution_merged_m = 20.0
 
 # Percentage of train partition over the whole dataset. Used only for l0 data.
-l0_test_over_tot = 0.1
+l0_test_over_tot = 0.2
 
 # Percentage of validation partition over train. Used only for l0 data.
-l0_validation_over_train = 0.11111111111111105
+l0_validation_over_train = 0.125
 
 # Tolerance (percentage) on test/ train geographical splitting. Used only for l0 data.
-l0_train_test_tolerance= 0.01
+# Set high to allow testing with small datasets.
+l0_train_test_tolerance= 0.1
 

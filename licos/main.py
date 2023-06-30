@@ -24,9 +24,10 @@ from utils import get_savepath_str
 def main(cfg):
     # Init
     rank = 0  # compute index of this node
-    time_per_batch = 0.1 * 100  # estimated time per batch in seconds
-    assert time_per_batch < 30, "For a high time per batch you may miss comms windows?"
-    time_for_comms = 60
+    assert (
+        cfg.time_per_batch < 30
+    ), "For a high time per batch you may miss comms windows?"
+    assert cfg.time_for_comms > 0, "Time for comms must be positive"
     time_in_standby = 0
     time_since_last_update = 0
     total_simulation_time = 0
@@ -62,6 +63,7 @@ def main(cfg):
         print("Removing old model...")
         os.remove(cfg.save_path + ".pth.tar")
 
+    print("Loading dataset...")
     # Init training
     (
         net,
@@ -115,14 +117,14 @@ def main(cfg):
                 + f"Battery SoC: {local_actor.state_of_charge:.2f}"
             )
             sys.stdout.flush()
-            # print(f"PASEOS advancing time by {time_per_batch}s.")
+            # print(f"PASEOS advancing time by {cfg.time_per_batch}s.")
 
         ################################################################################
         # Decide what this rank will do in this time step
         activity, power_consumption, time_in_standby = decide_on_activity(
             paseos_instance,
-            time_per_batch,
-            time_for_comms,
+            cfg.time_per_batch,
+            cfg.time_for_comms,
             time_in_standby,
             standby_period,
             time_since_last_update,
@@ -145,7 +147,7 @@ def main(cfg):
                 activity,
                 power_consumption,
                 paseos_instance,
-                time_for_comms,
+                cfg.time_for_comms,
                 constraint_function,
             )
             # 2) Evaluate test set before exchanging models
@@ -200,12 +202,11 @@ def main(cfg):
                 activity,
                 power_consumption,
                 paseos_instance,
-                time_per_batch,
+                cfg.time_per_batch,
                 constraint_function,
             )
-            time_since_last_update += time_per_batch
+            time_since_last_update += cfg.time_per_batch
             # 2) Train model on one batch
-            # start = time.time()
             train_dataloader_iter = train_one_batch(
                 rank,
                 net,
@@ -217,8 +218,6 @@ def main(cfg):
                 batch_idx,
                 cfg.clip_max_norm,
             )
-            # if batch_idx % 10 == 0:
-            #     print(f"Training one batch took {time.time() - start}s")
 
             batch_idx += 1
         else:
@@ -227,10 +226,10 @@ def main(cfg):
                 activity,
                 power_consumption,
                 paseos_instance,
-                time_for_comms,
+                cfg.time_for_comms,
                 constraint_function,
             )
-            time_since_last_update += time_per_batch
+            time_since_last_update += cfg.time_per_batch
             print(
                 f"Rank {rank} standing by - Temperature[C]: "
                 + f"{local_actor.temperature_in_K - 273.15:.2f},"

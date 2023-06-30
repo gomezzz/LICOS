@@ -10,6 +10,7 @@ Learning Image Compression On board a Satellite constellation
   - [Getting Started](#getting-started)
     - [Prerequisites](#prerequisites)
     - [Set up datasets](#set-up-datasets)
+    - [THRawS Dataset preparation](#thraws-dataset-preparation)
     - [Launch a training run](#launch-a-training-run)
     - [Evaluating a trained model](#evaluating-a-trained-model)
   - [Contact](#contact)
@@ -50,7 +51,32 @@ conda activate licos
 
 To launch the training on, e.g.,`AID`, it is necessary to download the corresponding datasets. Please, place the data in two folders `your_dataset/train` and `your_dataset/test` and create a config file in the `cfg` folder for your run. You need to specify the path to your dataset in the config file with the `dataset` parameter. Please, have a look at the `cfg/default_cfg.toml` file for an example and additional explanations on different parameters. By default, we rely on the dataloaders used by CompressAI. See [here](https://interdigitalinc.github.io/CompressAI/datasets.html) for more information.
 
-If you want to use a custom dataset with non-RGB data, you may need to create a custom dataset class similar to the one in `l0_image_folder.py`.
+If you want to use a custom dataset with non-RGB data, you may need to create a custom dataset class similar to the one in `raw_image_folder.py`.
+
+
+### THRawS Dataset preparation
+This work is based on Sentinel-2 Raw data. included in the dataset [THRawS](https://zenodo.org/record/7908728#.ZGxSMHZBy3A).
+To prepare your data, proceed as follows. 
+
+1. Navigate to the `data_preparation` directory and clone [PyRawS](https://github.com/ESA-PhiLab/PyRawS) in it with `git clone https://github.com/ESA-PhiLab/PyRawS.git` . PyRaWS provide APIs to process Sentinel-2 raw data.
+2. Install PyRaWs as indicated in its [README](https://github.com/ESA-PhiLab/PyRawS#installation).
+3. Download [THRawS](https://zenodo.org/record/7908728#.ZGxSMHZBy3A). Please, notice the entire dataset size if of **147.6 GB**.
+4. Place all the downaloded ZIP files into `data_preparation\data\THRAWS\raw`. There is an empty file called `put_THRAWS_here.txt` to give you indication of the right location. 
+5. Decompress all the zip files in `data_preparation\data\THRAWS\raw`. 
+6. Update the variables `PYRAWS_HOME_PATH` and `DATA_PATH` variables in `data_preparation\sys_cfg.py` with the absolute path to `PyRawS` and `data` directories. 
+ For more information, please refer to [Data directory](https://github.com/ESA-PhiLab/PyRawS#data-directory).
+7. Move `data_preparation\sys_cfg.py` to `data_preparation\PyRawS\pyraws\sys_cfg.py`.
+8. Activate the `pyraws` environment through:
+
+```conda activate pyraws```
+
+9. From `data_preparation` launch the `create_tif.py`. To this aim, you can used: 
+
+```python create_tif.py --input_dir PATH_TO_RAW```
+
+where `PATH_TO_RAW` is the path to the `data\THRAWS\raw` directory. 
+
+10. `PyRawS` is not needed anymore and can be now removed.
 
 ### Launch a training run
 
@@ -69,3 +95,4 @@ You can evaluate a trained model by using the `eval_script.py` script. It may re
 ## Contact
 
 If you have any questions, feel to reach out to @gomezzz (email: `pablo.gomez at esa.int`) or @GabrieleMeoni (email: `G.Meoni@tudelft.nl`). You can also open an issue on the GitHub repository.
+

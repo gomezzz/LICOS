@@ -11,7 +11,7 @@ from compressai.datasets import ImageFolder
 from compressai.losses import RateDistortionLoss
 
 from utils import AverageMeter, configure_optimizers
-from l0_image_folder import L0ImageFolder
+from raw_image_folder import RawImageFolder
 from model_utils import get_model
 
 
@@ -38,30 +38,30 @@ def init_training(cfg, rank):
         [transforms.CenterCrop(cfg.patch_size), transforms.ToTensor()]
     )
 
-    if cfg.use_l0_data:
-        train_dataset = L0ImageFolder(
+    if cfg.use_raw_data:
+        train_dataset = RawImageFolder(
             root=cfg.dataset,
             seed=cfg.seed,
-            test_over_total_percentage=cfg.l0_test_over_tot,
-            valid_over_train_percentage=cfg.l0_validation_over_train,
-            l0_format=cfg.l0_format,
-            target_resolution_merged_m=cfg.l0_target_resolution_merged_m,
+            test_over_total_percentage=cfg.raw_test_over_tot,
+            valid_over_train_percentage=cfg.raw_validation_over_train,
+            raw_format=cfg.raw_format,
+            target_resolution_merged_m=cfg.raw_target_resolution_merged_m,
             preloaded=True,
             split="train",
             transform=train_transforms,
-            geographical_split_tolerance=cfg.l0_train_test_tolerance,
+            geographical_split_tolerance=cfg.raw_train_test_tolerance,
         )
-        validation_dataset = L0ImageFolder(
+        validation_dataset = RawImageFolder(
             root=cfg.dataset,
             seed=cfg.seed,
-            test_over_total_percentage=cfg.l0_test_over_tot,
-            valid_over_train_percentage=cfg.l0_validation_over_train,
-            l0_format=cfg.l0_format,
-            target_resolution_merged_m=cfg.l0_target_resolution_merged_m,
+            test_over_total_percentage=cfg.raw_test_over_tot,
+            valid_over_train_percentage=cfg.raw_validation_over_train,
+            raw_format=cfg.raw_format,
+            target_resolution_merged_m=cfg.raw_target_resolution_merged_m,
             preloaded=True,
             split="validation",
             transform=validation_transforms,
-            geographical_split_tolerance=cfg.l0_train_test_tolerance,
+            geographical_split_tolerance=cfg.raw_train_test_tolerance,
         )
     else:
         train_dataset = ImageFolder(
@@ -92,8 +92,8 @@ def init_training(cfg, rank):
         pin_memory=(device == "cuda:" + str(rank)),
         pin_memory_device=device,
     )
-    if cfg.use_l0_data:
-        if cfg.l0_format == "raw":
+    if cfg.use_raw_data:
+        if cfg.raw_format == "raw":
             net = get_model(
                 model=cfg.model,
                 pretrained=cfg.pretrained,
@@ -112,8 +112,8 @@ def init_training(cfg, rank):
             quality=cfg.model_quality, pretrained=cfg.pretrained
         )
 
-    if cfg.use_l0_data:
-        if cfg.l0_format == "raw":
+    if cfg.use_raw_data:
+        if cfg.raw_format == "split":
             net = get_model(
                 model=cfg.model,
                 pretrained=cfg.pretrained,

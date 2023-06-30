@@ -7,7 +7,7 @@ import rasterio
 from compressai.registry import register_dataset
 from torchvision import transforms
 from skimage import img_as_ubyte
-from l0_utils import (
+from raw_utils import (
     BAND_LIST,
     DN_MAX,
     geographical_splitter,
@@ -19,9 +19,9 @@ from sklearn.model_selection import train_test_split
 from copy import deepcopy
 
 
-@register_dataset("L0ImageFolder")
-class L0ImageFolder(Dataset):
-    """L0 images data loader.
+@register_dataset("RawImageFolder")
+class RawImageFolder(Dataset):
+    """Raw images data loader.
 
     Args:
         Dataset (Dataset): dataset class.
@@ -33,7 +33,7 @@ class L0ImageFolder(Dataset):
         seed,
         test_over_total_percentage,
         valid_over_train_percentage,
-        l0_format,
+        raw_format,
         target_resolution_merged_m=20.0,
         transform=None,
         preloaded=True,
@@ -41,7 +41,7 @@ class L0ImageFolder(Dataset):
         geographical_split_tolerance=0.01,
         use_full_range=False,
     ):
-        """Init function for L0ImageFolder.
+        """Init function for RawImageFolder.
 
         Args:
             root (string): root directory of the dataset
@@ -50,7 +50,7 @@ class L0ImageFolder(Dataset):
             (e.g., 0.8 means 80% train and 20% test fot the total dataset).
             valid_over_train_percentage (float): split percentage over the whole dataset
             (e.g., 0.1 means validation is 10% over the train dataset).
-            l0_format (string): use "raw" to load bands separately, "merged" to load all the bands in one,
+            raw_format (string): use "split" to load bands separately, "merged" to load all the bands in one,
             "merged_with_res", to merge bands with the same resolution.
             target_resolution_merged_m (float, optional): target resolution in m when merged format is used. Defaults to 20.0.
             transform (callable, optional): a function or transform that takes in tensor and returns a transformed version.
@@ -63,14 +63,14 @@ class L0ImageFolder(Dataset):
             ValueError: Not implemented.
         """
 
-        l0_files = sorted(glob(os.path.join(root, "*")))
+        raw_files = sorted(glob(os.path.join(root, "*")))
 
-        if (l0_files is None) or (len(l0_files) == 0):
+        if (raw_files is None) or (len(raw_files) == 0):
             raise RuntimeError(f'Invalid directory "{root}"')
 
         # Splitting according to seed
         train_samples, test_samples = geographical_splitter(
-            l0_files,
+            raw_files,
             test_size_percentage=test_over_total_percentage,
             seed=seed,
             split_percentage_error_tolerance=geographical_split_tolerance,
@@ -109,7 +109,7 @@ class L0ImageFolder(Dataset):
         else:
             self.transform = None
 
-        self.l0_format = l0_format
+        self.raw_format = raw_format
 
         # If True,images are preloaded
         self.preloaded = preloaded
@@ -117,7 +117,7 @@ class L0ImageFolder(Dataset):
         # Range
         self.use_full_range = use_full_range
 
-        if self.l0_format == "raw":
+        if self.raw_format == "split":
             # Reshape samples to have a new sample for each band
             self._get_raw_format_()
             if preloaded:
@@ -132,7 +132,7 @@ class L0ImageFolder(Dataset):
                 # Samples are preloaded
                 self.samples = files
 
-        elif self.l0_format == "merged":
+        elif self.raw_format == "merged":
             if preloaded:
                 files = []
                 for sample in self.samples:
@@ -141,7 +141,7 @@ class L0ImageFolder(Dataset):
                 self.samples = files
 
         else:
-            raise ValueError(self.l0_format + ".Not implemented.")
+            raise ValueError(self.raw_format + ".Not implemented.")
 
     def _get_raw_format_(self):
         """Reshape the samples list to have a new file for each band."""
@@ -155,7 +155,7 @@ class L0ImageFolder(Dataset):
 
     def _get_merged_file_(self, file_path):
         """
-        Merge all the bands for a single file in a single l0_file by upsample.
+        Merge all the bands for a single file in a single raw_file by upsample.
         Args:
             file_path (str): path to the band file.
         Returns:
@@ -205,9 +205,9 @@ class L0ImageFolder(Dataset):
         if self.preloaded:
             img = self.samples[index]
         else:
-            if self.l0_format == "raw":
+            if self.raw_format == "raw":
                 img = self._open_band_(self.samples[index])
-            elif self.l0_format == "merged":
+            elif self.raw_format == "merged":
                 img = self._get_merged_file_(self.samples[index])
 
         if self.transform:

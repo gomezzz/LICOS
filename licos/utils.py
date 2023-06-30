@@ -27,8 +27,8 @@ def get_savepath_str(cfg: DotMap) -> str:
         + cfg.model
         + "qual="
         + str(cfg.model_quality)
-        + "_l0="
-        + cfg.l0_format
+        + "_raw="
+        + cfg.raw_format
         + "_seed="
         + str(cfg.seed)
         + datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
@@ -149,9 +149,9 @@ def check_cfg(config):
     # Check model quality values
     assert config.model_quality > 0 and config.model_quality < 9
 
-    # Check l0 values
-    assert config.l0_format in ["raw", "merged"]
-    assert isinstance(config.use_l0_data, bool)
-    assert isinstance(config.l0_target_resolution_merged_m, float)
-    assert isinstance(config.l0_train_test_split, float)
-    assert config.l0_train_test_split >= 0 and config.l0_train_test_split <= 1.0
+    # Check raw values
+    assert config.raw_format in ["raw", "merged"]
+    assert isinstance(config.use_raw_data, bool)
+    assert isinstance(config.raw_target_resolution_merged_m, float)
+    assert isinstance(config.raw_train_test_split, float)
+    assert config.raw_train_test_split >= 0 and config.raw_train_test_split <= 1.0

@@ -45,5 +45,5 @@ def get_model(model, pretrained, in_channels=3, quality=1):
         )
 
     else:
-        raise ValueError("model: " + model + " not supported for l0 data.")
+        raise ValueError("model: " + model + " not supported for raw data.")
     return net

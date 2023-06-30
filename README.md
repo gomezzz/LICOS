@@ -33,7 +33,7 @@ To prepare your data, proceed as follows.
 
 9. From `data_preparation` launch the `create_tif.py`. For more information, please launch: 
 
-```python create_tif --help```
+```python create_tif.py --help```
 
 10. `PyRawS` is not needed anymore and can be now removed.
 

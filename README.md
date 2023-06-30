@@ -70,9 +70,11 @@ To prepare your data, proceed as follows.
 
 ```conda activate pyraws```
 
-9. From `data_preparation` launch the `create_tif.py`. For more information, please launch: 
+9. From `data_preparation` launch the `create_tif.py`. To this aim, you can used: 
 
-```python create_tif.py --help```
+```python create_tif.py --input_dir PATH_TO_RAW```
+
+where `PATH_TO_RAW` is the path to the `data\THRAWS\raw` directory. 
 
 10. `PyRawS` is not needed anymore and can be now removed.
 

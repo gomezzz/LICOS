@@ -31,8 +31,7 @@ def main(cfg):
     time_since_last_update = 0
     total_simulation_time = 0
     standby_period = 900  # how long to standby if necessary
-    MPI_sync_period = 20  # After how many seconds we wait synchronize instance clocks
-
+    MPI_sync_period = 600  # After how many seconds we wait synchronize instance clocks
     cfg.save_path = get_savepath_str(cfg)
 
     plot = False
@@ -98,6 +97,7 @@ def main(cfg):
             print(
                 f"Rank {rank} waiting for sync at t={local_actor.local_time}", end=" ", flush=True
             )
+            _ = comm.allreduce(1, op=MPI.SUM)  # send one to indicate still running
             comm.Barrier()
             print(f"Rank {rank} synced.", flush=True)
             time_of_last_sync = local_actor.local_time.mjd2000 * pk.DAY2SEC
@@ -247,6 +247,15 @@ def main(cfg):
         delimiter=",",
     )
     toml.dump(cfg, open(cfg.save_path + "/cfg.toml", "w"))
+
+    print(f"Rank {rank} waiting to finish.")
+
+    # Send 0 as sign that we are finished
+    # Wait until all ranks are finished
+    while comm.allreduce(0, op=MPI.SUM) > 0:
+        print(f"Rank {rank} standing by...")
+        comm.Barrier()
+
     print(f"Rank {rank} finished.")
 
 

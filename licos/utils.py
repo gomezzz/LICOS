@@ -10,6 +10,8 @@ import torch.nn as nn
 from compressai.optimizers import net_aux_optimizer
 from compressai.zoo import image_models
 
+from datetime import datetime
+
 
 def get_savepath_str(cfg: DotMap) -> str:
     """Determines sets and returns the path this run is saved under.
@@ -29,6 +31,7 @@ def get_savepath_str(cfg: DotMap) -> str:
         + cfg.l0_format
         + "_seed="
         + str(cfg.seed)
+        + datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
     )
 
 

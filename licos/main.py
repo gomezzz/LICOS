@@ -2,7 +2,6 @@ import sys
 import os
 import warnings
 from pathlib import Path
-import time
 
 import toml
 from dotmap import DotMap
@@ -208,7 +207,6 @@ def main(cfg):
             )
             time_since_last_update += cfg.time_per_batch
             # 2) Train model on one batch
-            start = time.time()
             train_dataloader_iter = train_one_batch(
                 rank,
                 net,
@@ -220,7 +218,6 @@ def main(cfg):
                 batch_idx,
                 cfg.clip_max_norm,
             )
-            print(f"Training batch took {time.time() - start} seconds.")
 
             batch_idx += 1
         else:

@@ -24,7 +24,6 @@ def get_savepath_str(cfg: DotMap) -> str:
     Returns:
         str: path
     """
-    timestamp = get_timestamp()
     return (
         "results/"
         + cfg.model

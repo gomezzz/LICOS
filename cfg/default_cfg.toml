@@ -49,8 +49,8 @@ pretrained = false
 # Quality value for the model, 1 to 8
 model_quality = 1
 
-# Whether to use l0 data
-use_l0_data = false
+# Whether to use raw data
+use_raw_data = false
 
 # Time needed for communications in seconds
 time_for_comms = 60.0
@@ -58,19 +58,19 @@ time_for_comms = 60.0
 # estimated time per batch in seconds
 time_per_batch = 1.0
 
-# L0 data formatting 
+# Raw data formatting 
 # raw - as 13 individual bands
 # merged - 13 channel img
-l0_format = "raw"
+raw_format = "raw"
 
-# For l0 data, image target resolution for merged mode.
-l0_target_resolution_merged_m = 20.0
+# For raw data, image target resolution for merged mode.
+raw_target_resolution_merged_m = 20.0
 
-# Percentage of train partition over the whole dataset. Used only for l0 data.
-l0_test_over_tot = 0.1
+# Percentage of train partition over the whole dataset. Used only for raw data.
+raw_test_over_tot = 0.1
 
-# Percentage of eval partition over train. Used only for l0 data.
-l0_validation_over_train = 0.11111111111111105
+# Percentage of eval partition over train. Used only for raw data.
+raw_validation_over_train = 0.11111111111111105
 
-# Tolerance (percentage) on test/ train geographical splitting. Used only for l0 data.
-l0_train_test_tolerance= 0.01
+# Tolerance (percentage) on test/ train geographical splitting. Used only for raw data.
+raw_train_test_tolerance= 0.01

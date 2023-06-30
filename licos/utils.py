@@ -34,8 +34,7 @@ def get_savepath_str(cfg: DotMap) -> str:
         + cfg.l0_format
         + "_seed="
         + str(cfg.seed)
-        + "_"
-        + timestamp
+        + datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
     )
 
 

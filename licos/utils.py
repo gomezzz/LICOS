@@ -13,8 +13,6 @@ from compressai.zoo import image_models
 from datetime import datetime
 
 
-
-
 def get_savepath_str(cfg: DotMap) -> str:
     """Determines sets and returns the path this run is saved under.
 

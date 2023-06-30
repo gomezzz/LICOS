@@ -1,6 +1,7 @@
 import sys
 import os
 import warnings
+import time
 from pathlib import Path
 
 import toml
@@ -24,15 +25,13 @@ from utils import get_savepath_str
 def main(cfg):
     # Init
     rank = 0  # compute index of this node
-    assert (
-        cfg.time_per_batch < 30
-    ), "For a high time per batch you may miss comms windows?"
+    assert cfg.time_per_batch < 30, "For a high time per batch you may miss comms windows?"
     assert cfg.time_for_comms > 0, "Time for comms must be positive"
     time_in_standby = 0
     time_since_last_update = 0
     total_simulation_time = 0
     standby_period = 900  # how long to standby if necessary
-    MPI_sync_period = 600  # After how many seconds we wait synchronize instance clocks
+    MPI_sync_period = 20  # After how many seconds we wait synchronize instance clocks
 
     cfg.save_path = get_savepath_str(cfg)
 
@@ -63,7 +62,7 @@ def main(cfg):
         print("Removing old model...")
         os.remove(cfg.save_path + ".pth.tar")
 
-    print("Loading dataset...")
+    print("Loading dataset...", flush=True)
     # Init training
     (
         net,
@@ -77,18 +76,13 @@ def main(cfg):
         train_dataloader_iter,
     ) = init_training(cfg, rank)
 
-    print(f"Rank {rank} - Init training")
+    print(f"Rank {rank} - Init training", flush=True)
     sys.stdout.flush()
 
     # Init paseos
     paseos_instance, local_actor, groundstations = init_paseos(rank, comm.Get_size())
     time_of_last_sync = local_actor.local_time.mjd2000 * pk.DAY2SEC
-
-    print(f"Rank {rank} - Init PASEOS")
-    sys.stdout.flush()
-
-    print(f"Rank {rank} - Init PASEOS")
-    sys.stdout.flush()
+    print(f"Rank {rank} - Init PASEOS", flush=True)
 
     if plot and rank == 0:
         plotter = paseos.plot(paseos_instance, paseos.PlotType.SpacePlot)
@@ -100,17 +94,15 @@ def main(cfg):
     while total_simulation_time < cfg.simulation_time:
         ################################################################################
         # Sync time between ranks to minimize divergence
-        if (
-            local_actor.local_time.mjd2000 * pk.DAY2SEC - time_of_last_sync
-        ) > MPI_sync_period:
-            print(f"Rank {rank} waiting for sync", end=" ")
-            sys.stdout.flush()
+        if (local_actor.local_time.mjd2000 * pk.DAY2SEC - time_of_last_sync) > MPI_sync_period:
+            print(
+                f"Rank {rank} waiting for sync at t={local_actor.local_time}", end=" ", flush=True
+            )
             comm.Barrier()
+            print(f"Rank {rank} synced.", flush=True)
             time_of_last_sync = local_actor.local_time.mjd2000 * pk.DAY2SEC
-            if rank == 0:
-                print()
 
-        if batch_idx % 100 == 0:
+        if batch_idx % 1 == 0:
             print(
                 f"Rank {rank} - {str(paseos_instance.local_actor.local_time)} - Temperature[C]: "
                 + f"{local_actor.temperature_in_K - 273.15:.2f},"
@@ -239,9 +231,7 @@ def main(cfg):
         if plot and batch_idx % 10 == 0 and rank == 0:
             plotter.update(paseos_instance)
 
-        total_simulation_time = (
-            paseos_instance._state.time - paseos_instance._cfg.sim.start_time
-        )
+        total_simulation_time = paseos_instance._state.time - paseos_instance._cfg.sim.start_time
 
     Path(cfg.save_path + "/").mkdir(parents=True, exist_ok=True)
     paseos_instance.save_status_log_csv(cfg.save_path + "/" + str(rank) + ".csv")

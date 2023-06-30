@@ -205,7 +205,7 @@ class RawImageFolder(Dataset):
         if self.preloaded:
             img = self.samples[index]
         else:
-            if self.raw_format == "raw":
+            if self.raw_format == "split":
                 img = self._open_band_(self.samples[index])
             elif self.raw_format == "merged":
                 img = self._get_merged_file_(self.samples[index])

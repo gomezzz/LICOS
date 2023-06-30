@@ -61,7 +61,7 @@ time_per_batch = 1.0
 # Raw data formatting 
 # raw - as 13 individual bands
 # merged - 13 channel img
-raw_format = "raw"
+raw_format = "split"
 
 # For raw data, image target resolution for merged mode.
 raw_target_resolution_merged_m = 20.0

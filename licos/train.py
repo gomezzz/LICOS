@@ -93,7 +93,7 @@ def init_training(cfg, rank):
         pin_memory_device=device,
     )
     if cfg.use_raw_data:
-        if cfg.raw_format == "raw":
+        if cfg.raw_format == "split":
             net = get_model(
                 model=cfg.model,
                 pretrained=cfg.pretrained,

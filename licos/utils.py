@@ -150,7 +150,7 @@ def check_cfg(config):
     assert config.model_quality > 0 and config.model_quality < 9
 
     # Check raw values
-    assert config.raw_format in ["raw", "merged"]
+    assert config.raw_format in ["split", "merged"]
     assert isinstance(config.use_raw_data, bool)
     assert isinstance(config.raw_target_resolution_merged_m, float)
     assert isinstance(config.raw_train_test_split, float)

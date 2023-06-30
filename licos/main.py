@@ -102,7 +102,7 @@ def main(cfg):
             print(f"Rank {rank} synced.", flush=True)
             time_of_last_sync = local_actor.local_time.mjd2000 * pk.DAY2SEC
 
-        if batch_idx % 1 == 0:
+        if batch_idx % 100 == 0:
             print(
                 f"Rank {rank} - {str(paseos_instance.local_actor.local_time)} - Temperature[C]: "
                 + f"{local_actor.temperature_in_K - 273.15:.2f},"

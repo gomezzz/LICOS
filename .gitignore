@@ -138,3 +138,7 @@ results*
 .tar
 .csv
 .mpi_lock
+
+# Data preparation
+data_preparation/THRAWS/raw/*
+data_preparation/my_tif_dir/*

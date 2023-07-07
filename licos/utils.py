@@ -13,28 +13,6 @@ from compressai.zoo import image_models
 from datetime import datetime
 
 
-def get_timestamp():
-    """Return current timestamp.
-
-    Returns:
-        str: timestamp
-    """
-    timestamp = datetime.now()
-    return (
-        str(timestamp.year)
-        + "_"
-        + str(timestamp.month)
-        + "_"
-        + str(timestamp.day)
-        + "_"
-        + str(timestamp.hour)
-        + "_"
-        + str(timestamp.minute)
-        + "_"
-        + str(timestamp.second)
-    )
-
-
 def get_savepath_str(cfg: DotMap) -> str:
     """Determines sets and returns the path this run is saved under.
 
@@ -44,7 +22,6 @@ def get_savepath_str(cfg: DotMap) -> str:
     Returns:
         str: path
     """
-    timestamp = get_timestamp()
     return (
         "results/"
         + cfg.model
@@ -54,8 +31,7 @@ def get_savepath_str(cfg: DotMap) -> str:
         + cfg.l0_format
         + "_seed="
         + str(cfg.seed)
-        + "_"
-        + timestamp
+        + datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
     )
 
 

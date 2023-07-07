@@ -44,7 +44,6 @@ def main(cfg):
 
     paseos.set_log_level("INFO")
     device = "cuda:" + str(rank) if cfg.cuda and torch.cuda.is_available() else "cpu"
-    cfg.pretrained = False
 
     # Init MPI
     comm = MPI.COMM_WORLD

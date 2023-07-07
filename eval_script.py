@@ -15,7 +15,7 @@ import pandas as pd
 sys.path.append("./licos/")
 
 from licos.model_utils import get_model
-from licos.l0_image_folder import L0ImageFolder
+from licos.raw_image_folder import RawImageFolder
 
 from eval_utils import (
     compute_bpp,
@@ -29,13 +29,13 @@ from eval_utils import (
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 seeds = [2]
-cfg = DotMap(toml.load("cfg/l0.toml"), _dynamic=False)
+cfg = DotMap(toml.load("cfg/raw.toml"), _dynamic=False)
 
 # Small dataset
 dataset = "/home/pablo/raw_test/"
-cfg.l0_train_test_tolerance = 0.5
-cfg.l0_test_over_tot = 0.5
-cfg.l0_validation_over_train = 0.5
+cfg.raw_train_test_tolerance = 0.5
+cfg.raw_test_over_tot = 0.5
+cfg.raw_validation_over_train = 0.5
 
 # Large dataset
 # dataset = "/home/pablo/rawdata/my_tif_dir"
@@ -47,19 +47,19 @@ results_df = pd.DataFrame(
 for seed in seeds:
     cfg.seed = seed
     checkpoint_path = (
-        "results/bmshj2018-factorizedqual=1_l0=raw_seed=" + str(seed) + ".pth.tar"
+        "results/bmshj2018-factorizedqual=1_raw=split_seed=" + str(seed) + ".pth.tar"
     )
     checkpoint_merged_path = (
-        "results/bmshj2018-factorizedqual=1_l0=merged_seed=" + str(seed) + ".pth.tar"
+        "results/bmshj2018-factorizedqual=1_raw=merged_seed=" + str(seed) + ".pth.tar"
     )
 
     print("Loading models at {} and {}".format(checkpoint_path, checkpoint_merged_path))
 
-    net_raw = get_model(cfg.model, False, 1, cfg.model_quality)
-    print(f"Raw Models has Parameters: {sum(p.numel() for p in net_raw.parameters())}")
+    net_split = get_model(cfg.model, False, 1, cfg.model_quality)
+    print(f"Split Models has Parameters: {sum(p.numel() for p in net_split.parameters())}")
     checkpoint = torch.load(checkpoint_path, map_location=device)
-    net_raw.load_state_dict(checkpoint["state_dict"])
-    net_raw.update()
+    net_split.load_state_dict(checkpoint["state_dict"])
+    net_split.update()
 
     net_merged = get_model(cfg.model, False, 13, cfg.model_quality)
     print(
@@ -70,29 +70,29 @@ for seed in seeds:
     net_merged.update()
 
     print("Loading dataset...")
-    test_data_raw = L0ImageFolder(
+    test_data_split = RawImageFolder(
         dataset,
         cfg.seed,
-        cfg.l0_test_over_tot,
-        cfg.l0_validation_over_train,
-        "raw",
-        cfg.l0_target_resolution_merged_m,
+        cfg.raw_test_over_tot,
+        cfg.raw_validation_over_train,
+        "split",
+        cfg.raw_target_resolution_merged_m,
         split="test",
-        geographical_split_tolerance=cfg.l0_train_test_tolerance,
+        geographical_split_tolerance=cfg.raw_train_test_tolerance,
     )
-    test_data_merged = L0ImageFolder(
+    test_data_merged = RawImageFolder(
         dataset,
         cfg.seed,
-        cfg.l0_test_over_tot,
-        cfg.l0_validation_over_train,
+        cfg.raw_test_over_tot,
+        cfg.raw_validation_over_train,
         "merged",
-        cfg.l0_target_resolution_merged_m,
+        cfg.raw_target_resolution_merged_m,
         split="test",
-        geographical_split_tolerance=cfg.l0_train_test_tolerance,
+        geographical_split_tolerance=cfg.raw_train_test_tolerance,
     )
 
     print("Computing metrics")
-    psnr_raw, ssim_raw, bpp_raw = [], [], []
+    psnr_split, ssim_split, bpp_split = [], [], []
     psnr_merged, ssim_merged, bpp_merged = [], [], []
 
     psnr_bbp_matched, ssim_bbp_matched, bpp_bbp_matched = [], [], []
@@ -118,20 +118,20 @@ for seed in seeds:
         bpp_merged.append(out_bpp)
         compression_ratio["MERGED"] = compressed_size_in_bytes / img_size_in_bytes
 
-    print("Running raw dataset")
+    print("Running split dataset")
     # Individual channels
-    for img in tqdm(test_data_raw):
+    for img in tqdm(test_data_split):
         # LICOS 1C
         img_size_in_bytes = 8 * img.shape[0] * img.shape[1] * img.shape[2]
-        print("Original raw image size: ", img_size_in_bytes, " bytes")
-        out, reconstructed, diff, compressed_size_in_bytes = process_img(img, net_raw)
+        print("Original split image size: ", img_size_in_bytes, " bytes")
+        out, reconstructed, diff, compressed_size_in_bytes = process_img(img, net_split)
         out_bpp = compute_bpp(out)
         out_psnr = compute_psnr(img.unsqueeze(0), out["x_hat"])
         out_ssim = compute_msssim(img.unsqueeze(0), out["x_hat"])
-        psnr_raw.append(out_psnr)
-        ssim_raw.append(out_ssim)
-        bpp_raw.append(out_bpp)
-        compression_ratio["RAW"] = compressed_size_in_bytes / img_size_in_bytes
+        psnr_split.append(out_psnr)
+        ssim_split.append(out_ssim)
+        bpp_split.append(out_bpp)
+        compression_ratio["SPLIT"] = compressed_size_in_bytes / img_size_in_bytes
 
         PIL_img = Image.fromarray(np.uint8(img.squeeze() * 255), "L")
 
@@ -163,7 +163,7 @@ for seed in seeds:
         ) / img_size_in_bytes
 
     print("Type \t PSNR \t MSSSIM \t BPP")
-    print("RAW", np.mean(psnr_raw), np.mean(ssim_raw), np.mean(bpp_raw))
+    print("SPLIT", np.mean(psnr_split), np.mean(ssim_split), np.mean(bpp_split))
     print("MERGED", np.mean(psnr_merged), np.mean(ssim_merged), np.mean(bpp_merged))
     print(
         "JPEG BPP",
@@ -186,12 +186,12 @@ for seed in seeds:
 
     results_df = results_df.append(
         {
-            "Type": "RAW",
+            "Type": "SPLIT",
             "Seed": seed,
-            "PSNR": np.mean(psnr_raw),
-            "SSIM": np.mean(ssim_raw),
-            "BPP": np.mean(bpp_raw),
-            "Compression": compression_ratio["RAW"],
+            "PSNR": np.mean(psnr_split),
+            "SSIM": np.mean(ssim_split),
+            "BPP": np.mean(bpp_split),
+            "Compression": compression_ratio["SPLIT"],
         },
         ignore_index=True,
     )

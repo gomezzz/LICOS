@@ -57,24 +57,24 @@ time_for_comms = 18.375
 # on a unibap iX10-100
 time_per_batch = 10.0
 
-# Whether to use l0 data
-use_l0_data = true
+# Whether to use raw data
+use_raw_data = true
 
-# L0 data formatting 
-# raw - as 13 individual bands
+# Raw data formatting 
+# split - as 13 individual bands
 # merged - 13 channel img
-l0_format = "merged"
+raw_format = "merged"
 
-# For l0 data, image target resolution for merged mode.
-l0_target_resolution_merged_m = 20.0
+# For raw data, image target resolution for merged mode.
+raw_target_resolution_merged_m = 20.0
 
-# Percentage of train partition over the whole dataset. Used only for l0 data.
-l0_test_over_tot = 0.2
+# Percentage of train partition over the whole dataset. Used only for raw data.
+raw_test_over_tot = 0.2
 
-# Percentage of validation partition over train. Used only for l0 data.
-l0_validation_over_train = 0.125
+# Percentage of validation partition over train. Used only for raw data.
+raw_validation_over_train = 0.125
 
-# Tolerance (percentage) on test/ train geographical splitting. Used only for l0 data.
+# Tolerance (percentage) on test/ train geographical splitting. Used only for raw data.
 # Set high to allow testing with small datasets.
-l0_train_test_tolerance= 0.1
+raw_train_test_tolerance= 0.1
 

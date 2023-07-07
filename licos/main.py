@@ -33,7 +33,6 @@ def main(cfg):
     total_simulation_time = 0
     standby_period = 900  # how long to standby if necessary
     MPI_sync_period = 600  # After how many seconds we wait synchronize instance clocks
-
     cfg.save_path = get_savepath_str(cfg)
 
     plot = False
@@ -62,7 +61,7 @@ def main(cfg):
         print("Removing old model...")
         os.remove(cfg.save_path + ".pth.tar")
 
-    print("Loading dataset...")
+    print("Loading dataset...", flush=True)
     # Init training
     (
         net,
@@ -76,18 +75,13 @@ def main(cfg):
         train_dataloader_iter,
     ) = init_training(cfg, rank)
 
-    print(f"Rank {rank} - Init training")
+    print(f"Rank {rank} - Init training", flush=True)
     sys.stdout.flush()
 
     # Init paseos
     paseos_instance, local_actor, groundstations = init_paseos(rank, comm.Get_size())
     time_of_last_sync = local_actor.local_time.mjd2000 * pk.DAY2SEC
-
-    print(f"Rank {rank} - Init PASEOS")
-    sys.stdout.flush()
-
-    print(f"Rank {rank} - Init PASEOS")
-    sys.stdout.flush()
+    print(f"Rank {rank} - Init PASEOS", flush=True)
 
     if plot and rank == 0:
         plotter = paseos.plot(paseos_instance, paseos.PlotType.SpacePlot)
@@ -102,12 +96,15 @@ def main(cfg):
         if (
             local_actor.local_time.mjd2000 * pk.DAY2SEC - time_of_last_sync
         ) > MPI_sync_period:
-            print(f"Rank {rank} waiting for sync", end=" ")
-            sys.stdout.flush()
+            print(
+                f"Rank {rank} waiting for sync at t={local_actor.local_time}",
+                end=" ",
+                flush=True,
+            )
+            _ = comm.allreduce(1, op=MPI.SUM)  # send one to indicate still running
             comm.Barrier()
+            print(f"Rank {rank} synced.", flush=True)
             time_of_last_sync = local_actor.local_time.mjd2000 * pk.DAY2SEC
-            if rank == 0:
-                print()
 
         if batch_idx % 100 == 0:
             print(
@@ -256,6 +253,15 @@ def main(cfg):
         delimiter=",",
     )
     toml.dump(cfg, open(cfg.save_path + "/cfg.toml", "w"))
+
+    print(f"Rank {rank} waiting to finish.")
+
+    # Send 0 as sign that we are finished
+    # Wait until all ranks are finished
+    while comm.allreduce(0, op=MPI.SUM) > 0:
+        print(f"Rank {rank} standing by...")
+        comm.Barrier()
+
     print(f"Rank {rank} finished.")
 
 

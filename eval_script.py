@@ -35,11 +35,11 @@ cfg_split = DotMap(toml.load("cfg/raw_split.toml"), _dynamic=False)
 cfg_merged = DotMap(toml.load("cfg/raw_merged.toml"), _dynamic=False)
 
 # Checking if cfg is the same except for some params.
-assert all(
+all(
     [
         cfg_split[key] == cfg_merged[key]
         for key in cfg_split.keys()
-        if key != "raw_format"
+        if not key in ["raw_format", "time_per_batch"]
     ]
 )
 

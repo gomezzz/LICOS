@@ -33,6 +33,16 @@ merged_timestamp = "2023_06_30_15_11_37"
 device = "cuda" if torch.cuda.is_available() else "cpu"
 cfg_split = DotMap(toml.load("cfg/raw_split.toml"), _dynamic=False)
 cfg_merged = DotMap(toml.load("cfg/raw_merged.toml"), _dynamic=False)
+
+# Checking if cfg is the same except for some params.
+assert all(
+    [
+        cfg_split[key] == cfg_merged[key]
+        for key in cfg_split.keys()
+        if key != "raw_format"
+    ]
+)
+
 # Small dataset
 dataset = cfg_split.dataset
 

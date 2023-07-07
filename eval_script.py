@@ -56,7 +56,9 @@ for seed in seeds:
     print("Loading models at {} and {}".format(checkpoint_path, checkpoint_merged_path))
 
     net_split = get_model(cfg.model, False, 1, cfg.model_quality)
-    print(f"Split Models has Parameters: {sum(p.numel() for p in net_split.parameters())}")
+    print(
+        f"Split Models has Parameters: {sum(p.numel() for p in net_split.parameters())}"
+    )
     checkpoint = torch.load(checkpoint_path, map_location=device)
     net_split.load_state_dict(checkpoint["state_dict"])
     net_split.update()

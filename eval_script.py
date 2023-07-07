@@ -189,7 +189,7 @@ print(
 results_df = results_df.append(
     {
         "Type": "SPLIT",
-        "Seed": seed,
+        "Seed": cfg_split.seed,
         "PSNR": np.mean(psnr_split),
         "SSIM": np.mean(ssim_split),
         "BPP": np.mean(bpp_split),
@@ -200,7 +200,7 @@ results_df = results_df.append(
 results_df = results_df.append(
     {
         "Type": "MERGED",
-        "Seed": seed,
+        "Seed": cfg_merged.seed,
         "PSNR": np.mean(psnr_merged),
         "SSIM": np.mean(ssim_merged),
         "BPP": np.mean(bpp_merged),
@@ -211,7 +211,7 @@ results_df = results_df.append(
 results_df = results_df.append(
     {
         "Type": "JPEG BPP",
-        "Seed": seed,
+        "Seed": cfg_split.seed,
         "PSNR": np.mean(psnr_bbp_matched),
         "SSIM": np.mean(ssim_bbp_matched),
         "BPP": np.mean(bpp_bbp_matched),
@@ -222,7 +222,7 @@ results_df = results_df.append(
 results_df = results_df.append(
     {
         "Type": "JPEG PSNR",
-        "Seed": seed,
+        "Seed": cfg_split.seed,
         "PSNR": np.mean(psnr_psnr_matched),
         "SSIM": np.mean(ssim_psnr_matched),
         "BPP": np.mean(bpp_psnr_matched),
@@ -233,7 +233,7 @@ results_df = results_df.append(
 results_df = results_df.append(
     {
         "Type": "JPEG SSIM",
-        "Seed": seed,
+        "Seed": cfg_split.seed,
         "PSNR": np.mean(psnr_ssim_matched),
         "SSIM": np.mean(ssim_ssim_matched),
         "BPP": np.mean(bpp_ssim_matched),

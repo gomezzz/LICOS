@@ -39,7 +39,7 @@ all(
     [
         cfg_split[key] == cfg_merged[key]
         for key in cfg_split.keys()
-        if not key in ["raw_format", "time_per_batch"]
+        if key not in ["raw_format", "time_per_batch"]
     ]
 )
 

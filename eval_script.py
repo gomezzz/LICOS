@@ -43,7 +43,7 @@ assert all(
     ]
 )
 
-# Small dataset
+# Getting dataset path from cfg.
 dataset = cfg_split.dataset
 
 # Large dataset

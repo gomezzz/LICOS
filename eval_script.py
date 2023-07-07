@@ -26,8 +26,9 @@ from eval_utils import (
     find_closest_msssim,
     process_img,
 )
-split_timestamp="2023_06_30_15_03_29"
-merged_timestamp="2023_06_30_15_11_37"
+
+split_timestamp = "2023_06_30_15_03_29"
+merged_timestamp = "2023_06_30_15_11_37"
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 cfg_split = DotMap(toml.load("cfg/raw_split.toml"), _dynamic=False)
@@ -44,26 +45,30 @@ results_df = pd.DataFrame(
 
 
 checkpoint_path = (
-    "licos/results/bmshj2018-factorizedqual=1_raw=split_seed=" + str(cfg_split.seed) + "_t=" + split_timestamp + ".pth.tar"
+    "licos/results/bmshj2018-factorizedqual=1_raw=split_seed="
+    + str(cfg_split.seed)
+    + "_t="
+    + split_timestamp
+    + ".pth.tar"
 )
 checkpoint_merged_path = (
-    "licos/results/bmshj2018-factorizedqual=1_raw=merged_seed=" + str(cfg_merged.seed) + "_t=" + merged_timestamp + ".pth.tar"
+    "licos/results/bmshj2018-factorizedqual=1_raw=merged_seed="
+    + str(cfg_merged.seed)
+    + "_t="
+    + merged_timestamp
+    + ".pth.tar"
 )
 
 print("Loading models at {} and {}".format(checkpoint_path, checkpoint_merged_path))
 
 net_split = get_model(cfg_split.model, False, 1, cfg_split.model_quality)
-print(
-    f"Split Models has Parameters: {sum(p.numel() for p in net_split.parameters())}"
-)
+print(f"Split Models has Parameters: {sum(p.numel() for p in net_split.parameters())}")
 checkpoint = torch.load(checkpoint_path, map_location=device)
 net_split.load_state_dict(checkpoint["state_dict"])
 net_split.update()
 
 net_merged = get_model(cfg_merged.model, False, 13, cfg_merged.model_quality)
-print(
-    f"Merged Model has Parameters: {sum(p.numel() for p in net_merged.parameters())}"
-)
+print(f"Merged Model has Parameters: {sum(p.numel() for p in net_merged.parameters())}")
 checkpoint = torch.load(checkpoint_merged_path, map_location=device)
 net_merged.load_state_dict(checkpoint["state_dict"])
 net_merged.update()
@@ -106,9 +111,7 @@ for img in tqdm(test_data_merged):
     # LICOS 13C
     img_size_in_bytes = 8 * img.shape[0] * img.shape[1] * img.shape[2]
     print("Original merged image size: ", img_size_in_bytes, " bytes")
-    out, reconstructed, diff, compressed_size_in_bytes = process_img(
-        img, net_merged
-    )
+    out, reconstructed, diff, compressed_size_in_bytes = process_img(img, net_merged)
     out_bpp = compute_bpp(out)
     out_psnr = compute_psnr(img.unsqueeze(0), out["x_hat"])
     out_ssim = compute_msssim(img.unsqueeze(0), out["x_hat"])

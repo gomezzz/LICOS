@@ -6,9 +6,7 @@ import torch
 from utils import save_checkpoint
 
 
-def update_central_model(
-    rank, device, batch_idx, net, loss, best_loss, local_time, cfg
-):
+def update_central_model(rank, device, batch_idx, net, loss, best_loss, local_time, cfg):
     """Updates the model on the ground
 
     Args:
@@ -40,17 +38,17 @@ def update_central_model(
         central_model = torch.load(cfg.save_path + ".pth.tar", map_location=device)
         central_model_sd = central_model["state_dict"]
 
-        # TODO in the future consider which model is newer etc.
-        # central_local_time = central_model["local_time"]
+        # Average local and central model weights
+        # by weighting with the validation set scores.
 
-        # Weight models by test set scores.
-        loss_weight_sum = 1.0 / (loss.item() + best_loss.item())
+        # Normalize weights
+        local_model_weight = best_loss.item() / (best_loss.item() + loss.item())
+        central_model_weight = loss.item() / (best_loss.item() + loss.item())
 
-        # Average with ours
+        # Average the weights
         for key in local_sd:
-            local_sd[key] = (loss.item() * loss_weight_sum) * local_sd[key].to(
-                device
-            ) + (best_loss.item() * loss_weight_sum) * central_model_sd[key].to(device)
+            local_sd[key] = local_model_weight * local_sd[key].to(device)
+            local_sd[key] += central_model_weight * central_model_sd[key].to(device)
     else:
         print(f"Rank {rank} is starting the first central model.")
 

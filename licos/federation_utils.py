@@ -6,7 +6,9 @@ import torch
 from utils import save_checkpoint
 
 
-def update_central_model(rank, device, batch_idx, net, loss, best_loss, local_time, cfg):
+def update_central_model(
+    rank, device, batch_idx, net, loss, best_loss, local_time, cfg
+):
     """Updates the model on the ground
 
     Args:

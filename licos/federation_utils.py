@@ -3,7 +3,7 @@ import time
 import os
 import torch
 
-from utils import save_checkpoint
+from utils import save_checkpoint, save_model_checkpoint_over_time
 
 
 def update_central_model(
@@ -51,6 +51,17 @@ def update_central_model(
         for key in local_sd:
             local_sd[key] = local_model_weight * local_sd[key].to(device)
             local_sd[key] += central_model_weight * central_model_sd[key].to(device)
+
+        # Save checkpoint over time if requested in the cfg
+        if cfg.save_checkpoints_over_time:
+            state = {
+                "batch_idx": batch_idx,
+                "state_dict": local_sd,
+                "loss": loss,
+                "local_time": local_time,
+            }
+            save_model_checkpoint_over_time(cfg, local_time, rank, state)
+
     else:
         print(f"Rank {rank} is starting the first central model.")
 

@@ -25,12 +25,13 @@ def get_savepath_str(cfg: DotMap) -> str:
     return (
         "results/"
         + cfg.model
-        + "qual="
+        + "_qual="
         + str(cfg.model_quality)
         + "_raw="
         + cfg.raw_format
         + "_seed="
         + str(cfg.seed)
+        + "_t="
         + datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
     )
 
@@ -76,6 +77,38 @@ def save_checkpoint(state, is_best, filename="checkpoint.pth.tar"):
     torch.save(state, filename)
     if is_best:
         shutil.copyfile(filename, "checkpoint_best_loss.pth.tar")
+
+
+def save_model_checkpoint_over_time(cfg, local_time, rank, state):
+    """Save model over time.
+
+    Args:
+        cfg (DotMap): cfg of the run
+        local_time (float): local time of the rank in seconds
+        rank (int): index of rank
+        state (dict): model state.
+    """
+    # Directory path to local time_checkpoints
+    model_name = cfg.save_path.split("/")[-1].split(".")[0]
+    checkpoint_time_dir = os.path.join(cfg.save_path, model_name + "_time_checkpoints")
+
+    # Adding rank to model name
+    model_name = model_name + "_rank_" + str(rank)
+
+    # Create sub-directory
+    os.makedirs(checkpoint_time_dir, exist_ok=True)
+
+    print(f"Saving checkpoint at simulation time: {local_time}.")
+    save_checkpoint(
+        state=state,
+        is_best=False,
+        filename=checkpoint_time_dir
+        + "/"
+        + model_name
+        + "_sim_time="
+        + str(local_time)
+        + ".pth.tar",
+    )
 
 
 def check_cfg(config):

@@ -112,26 +112,6 @@ def init_training(cfg, rank):
             quality=cfg.model_quality, pretrained=cfg.pretrained
         )
 
-    if cfg.use_raw_data:
-        if cfg.raw_format == "split":
-            net = get_model(
-                model=cfg.model,
-                pretrained=cfg.pretrained,
-                in_channels=1,
-                quality=cfg.model_quality,
-            )
-        else:
-            net = get_model(
-                model=cfg.model,
-                pretrained=cfg.pretrained,
-                in_channels=13,
-                quality=cfg.model_quality,
-            )
-    else:
-        net = image_models[cfg.model](
-            quality=cfg.model_quality, pretrained=cfg.pretrained
-        )
-
     net = net.to(device)
 
     # if cfg.cuda and torch.cuda.device_count() > 1:

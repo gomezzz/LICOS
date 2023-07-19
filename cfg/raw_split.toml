@@ -5,7 +5,7 @@ model = "bmshj2018-factorized"
 dataset = "/home/pablo/rawdata/my_tif_dir/"
 
 # Simulation runtime in seconds
-simulation_time = 18144000.0
+simulation_time = 2592000.0
 
 # Learning rate
 learning_rate = 1e-4
@@ -80,4 +80,7 @@ raw_validation_over_train = 0.125
 # Tolerance (percentage) on test/ train geographical splitting. Used only for raw data.
 # Set high to allow testing with small datasets.
 raw_train_test_tolerance= 0.1
+
+# Save all the models over time
+save_checkpoints_over_time = true
 

@@ -54,13 +54,21 @@ def update_central_model(
 
         # Save checkpoint over time if requested in the cfg
         if cfg.save_checkpoints_over_time:
-
             # Directory path to local time_checkpoints
             model_name = cfg.save_path.split("/")[-1].split(".")[0]
-            checkpoint_time_dir = os.path.join(cfg.save_path, model_name + "_time_checkpoints")
-            print(checkpoint_time_dir + "/" + model_name + "_sim_time=" + str(local_time) + ".pth.tar")
+            checkpoint_time_dir = os.path.join(
+                cfg.save_path, model_name + "_time_checkpoints"
+            )
+            print(
+                checkpoint_time_dir
+                + "/"
+                + model_name
+                + "_sim_time="
+                + str(local_time)
+                + ".pth.tar"
+            )
             # Create sub-directory
-            os.makedirs(checkpoint_time_dir, exist_ok = True)
+            os.makedirs(checkpoint_time_dir, exist_ok=True)
 
             print(f"Saving checkpoint at simulation time: {local_time}.")
             save_checkpoint(
@@ -71,7 +79,12 @@ def update_central_model(
                     "local_time": local_time,
                 },
                 False,
-                filename=checkpoint_time_dir + "/" + model_name + "_sim_time=" + str(local_time) + ".pth.tar",
+                filename=checkpoint_time_dir
+                + "/"
+                + model_name
+                + "_sim_time="
+                + str(local_time)
+                + ".pth.tar",
             )
     else:
         print(f"Rank {rank} is starting the first central model.")

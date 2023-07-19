@@ -122,7 +122,7 @@ psnr_ssim_matched, ssim_ssim_matched, bpp_ssim_matched = [], [], []
 
 compression_ratio = {}
 
-N_images = 10
+N_images = 130
 
 print(f"DANGER USING ONLY {N_images}")
 print(f"DANGER USING ONLY {N_images}")

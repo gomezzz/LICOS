@@ -58,7 +58,7 @@ time_for_comms = 60.0
 # estimated time per batch in seconds
 time_per_batch = 1.0
 
-# Raw data formatting 
+# Raw data formatting
 # raw - as 13 individual bands
 # merged - 13 channel img
 raw_format = "split"
@@ -74,3 +74,6 @@ raw_validation_over_train = 0.11111111111111105
 
 # Tolerance (percentage) on test/ train geographical splitting. Used only for raw data.
 raw_train_test_tolerance= 0.01
+
+# Save all the models over time
+save_checkpoints_over_time = true

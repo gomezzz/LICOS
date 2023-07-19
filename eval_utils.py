@@ -31,7 +31,7 @@ def psnr(a, b):
     a = np.asarray(a).astype(np.float32)
     b = np.asarray(b).astype(np.float32)
     mse = np.mean(np.square(a - b))
-    return 20 * math.log10(255.0) - 10.0 * math.log10(mse)
+    return 20 * math.log10(255.0) - 10.0 * math.log10(mse + 1e-8)
 
 
 def mssim(a, b):

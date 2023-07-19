@@ -25,12 +25,13 @@ def get_savepath_str(cfg: DotMap) -> str:
     return (
         "results/"
         + cfg.model
-        + "qual="
+        + "_qual="
         + str(cfg.model_quality)
         + "_raw="
         + cfg.raw_format
         + "_seed="
         + str(cfg.seed)
+        + "_t="
         + datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
     )
 

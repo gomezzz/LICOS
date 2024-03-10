@@ -47,7 +47,7 @@ checkpoint = ""
 pretrained = true
 
 # Quality value for the model, 1 to 8
-model_quality = 2
+model_quality = 4
 
 # Time needed for communications in seconds
 time_for_comms = 18.375
@@ -55,7 +55,7 @@ time_for_comms = 18.375
 # estimated time per batch in seconds
 # note that this was computed for batchsize 16
 # on a unibap iX10-100
-time_per_batch = 8.0
+time_per_batch = 10.0
 
 # Whether to use raw data
 use_raw_data = true
@@ -63,7 +63,7 @@ use_raw_data = true
 # Raw data formatting
 # split - as 13 individual bands
 # merged - 13 channel img
-raw_format = "split"
+raw_format = "merged"
 
 # For raw data, whether dataset is preloaded.
 preloaded = true

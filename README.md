@@ -19,6 +19,13 @@ Learning Image Compression On board a Satellite constellation
 
 This is the code repository for the paper [Solving the Satellite Downlink Bottleneck: Distributed Onboard Learning of Image Compression](TODO). It provides the means to train and test an image compression model based on the Python module [CompressAI](https://interdigitalinc.github.io/CompressAI/) combined with the [PASEOS](https://www.github.com/aidotse/PASEOS) module to simulate physical constraints on the training. The paper demonstrates the onboard training of image compression for an Earth observation constellation on raw, unprocessed Sentinel-2 data but also works for postprocessed data such as the [AID dataset](https://captain-whu.github.io/AID/). To test on raw data, it uses the [THRawS dataset](https://zenodo.org/record/7908728) consisting of more than 100 samples (originally focusing on wildfires and volcanoes) from all over the world. We use [mpi4py](https://mpi4py.readthedocs.io/en/stable/) to distribute the training cross multiple devices / GPUs.
 
+
+<p align="center">
+  <a href="https://github.com/gomezzz/licos">
+    <img src="comparison-1.png" alt="Scheme">
+  </a>
+</p>
+
 ## Getting Started
 
 In the following we describe setting up the repo and launching a training run. For more details on the training process, please refer to the paper.

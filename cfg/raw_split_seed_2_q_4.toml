@@ -47,7 +47,7 @@ checkpoint = ""
 pretrained = true
 
 # Quality value for the model, 1 to 8
-model_quality = 2
+model_quality = 4
 
 # Time needed for communications in seconds
 time_for_comms = 18.375

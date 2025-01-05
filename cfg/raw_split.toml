@@ -35,7 +35,7 @@ cuda = true
 save = true
 
 # Set random seed for reproducibility
-seed = 42
+seed = 2
 
 # Gradient clipping max norm
 clip_max_norm = 1.0
@@ -47,7 +47,7 @@ checkpoint = ""
 pretrained = true
 
 # Quality value for the model, 1 to 8
-model_quality = 1
+model_quality = 2
 
 # Time needed for communications in seconds
 time_for_comms = 18.375
@@ -82,5 +82,5 @@ raw_validation_over_train = 0.125
 raw_train_test_tolerance= 0.1
 
 # Save all the models over time
-save_checkpoints_over_time = true
+save_checkpoints_over_time = false
 
